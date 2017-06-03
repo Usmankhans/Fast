@@ -1,0 +1,2 @@
+Node bin/www
+pause

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> {{ title }} </title>
+		<script src="{{Host}}:{{SocketPort1}}/socket.io/socket.io.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<link rel='stylesheet' href='/stylesheets/custom.css' />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-local-storage/0.6.0/angular-local-storage.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+
+
+		<!-- 		<script src="script4.js"></script>
+		-->		<!-- <script src="{{Host}}:{{SocketPort1}}/socket.io/socket.io.js"></script> -->
+		
+		<!-- 		<script src="Kpi-view.js"></script>
+		-->
+	</head>
+	
+	<body ng-app="kpi">
+		
+		<div style="background-color:#0066dd; width:100% ;height:70px;text-align: center;">
+			<img src="tty-logo-TTYINTERNETEN-png.png" alt="Logo" style="width:400px;height:70px;float: left">
+			<img src="eScoplogo-white.png" alt="Logo" title="escop-project.com" style="width:194px;height:70px;float: right; cursor:pointer;">
+			<h1 style="font-family:Verdana;font-size:420%;color:#ffffff;height:100%;position: relative;margin-top: 0em;margin-bottom: 0em;align:justify">FASTory Simulator</h1>
+		</div>
+		<div id="main">
+			<div id="hmenu">
+				<ul>
+					<li><a href="/" >Main Page</a></li>
+					<li>|</li>
+					<li><a href="/fmw">Simulator Interface</a></li>
+					<li>|</li>
+					<li><a href="/RTUs?url={{HostName}}/RTU">RTUs</a></li>
+					<li>|</li>
+					<li><a href="/instructions">Instructions</a></li>
+					<li>|</li>
+					<li><a href="/License">License Agreement</a></li>
+					<li>|</li>
+					<li><a href="/about">About</a></li>
+					<li>|</li>
+					<li><a href="/contacts">Contacts</a></li>
+					<li>|</li>
+					<li><a href="/kpi" style="border:1px solid #0066dd;">KPIs</a></li>
+				</ul>
+			</div>
+			<div>
+				<h1 style="font-family:Verdana;font-size:300%;color:#000000;">{{ title }} </h1>
+			</div>
+			
+			<div class="row" >
+				<div class="col-lg-12" ng-controller="kpiCtrl">
+					<div id="sidebar-wrapper" class="col-lg-2 f_s16" style="border:solid 2px black;">
+						<div class="list-group">
+							<a href="#" class="list-group-item active" ng-repeat="xml in xmlList" ng-click="openXml(xml)">
+								//xml//
+							</a>
+						</div>
+						
+					</div>
+					<div class="col-lg-7" style="border:solid 2px red;">
+						<div class="bs-docs-example" >							
+							<label class="checkbox inline ng-style: $index==0 && {padding:0,margin:0};" ng-repeat="rob in equipment" >
+								<input type="checkbox" ng-model="rob.status" ng-checked="rob.status">
+								//rob.name//
+							</label>
+							  <button class="btn btn-primary" type="button" ng-click="saveValue();">Done</button>
+
+						</div>
+						<div>
+							<pre>
+								<code>//xmlFile//</code>
+							</pre>
+						</div>
+					</div>
+					<div id="sidebar-wrapper" class="col-lg-3" style="border:solid 2px green;">
+						<h1>Table data</h1>
+						<label>Check me to check both: <input type="checkbox" ng-model="master"></label><br/>
+<input id="checkSlave" type="checkbox" ng-checked="master" aria-label="Slave input">
+					</div>
+				</div>
+				
+			</div>
+			
+			
+			<div style="text-align:center;color:#0066dd">
+				<h3>Copyright (c) 2016 Tampere University of Technology</h3>
+				<h4>All Rights Reserved</h4>
+			</div>
+		</div>
+	</body>
+	<script src="script3.js"></script>
+</html>
