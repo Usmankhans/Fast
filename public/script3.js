@@ -6,7 +6,10 @@ angular.module('kpi', ['LocalStorageModule'])
 	.controller('kpiCtrl', function($scope, $http, $timeout, localStorageService, $filter) {
 		$scope.xmlList = {};
 		$scope.xmlFile = "";
+      	$scope.xmlFileName = "";
 		$scope.selectRob = [];
+      	$scope.robotMapp = JSON.parse(localStorage.getItem("robots-array"));
+      	localStorage.setItem("robots-array", JSON.stringify([]));
 
 		var url = "http://localhost:3000/kpiValue/";
 		$scope.equipment = [{
@@ -41,24 +44,86 @@ angular.module('kpi', ['LocalStorageModule'])
 			status: 0
 		}];
 
-
 		$scope.loadData = function() {
-			$http.get(url + "getXmlList")
+          $http.get(url + "getXmlList")
 				.then(function(response) {
 					$scope.xmlList = response.data.data;
+
 				});
+
 		};
+      	$scope.loadRobots = function () {
+          $scope.robotMapp = JSON.parse(localStorage.getItem("robots-array"));
+        };
 
 		$scope.openXml = function(xmlFile) {
+          	document.getElementById("myModal").style.display="block";
+          	document.getElementById("xml-content").textContent="";
 			$scope.xmlFile = xmlFile;
+          	$scope.xmlFileName = xmlFile;
 			$http.get(url + "readXmlFile/" + xmlFile)
 				.then(function(response) {
 					$scope.xmlFile = response.data.data;
-					$scope.selectRob = localStorageService.get($scope.xmlFile);
+                  	localStorage.xmlFile = $scope.xmlFile;
+                  	localStorage.xmlFileName = $scope.xmlFileName;
+                  	$scope.selectRob = localStorageService.get($scope.xmlFile);
 					$scope.toggleAll();
 				});
 
 		};
+
+      $scope.close_dialog = function() {
+        document.getElementById("myModal").style.display="none";
+
+      };
+      $scope.view_xml = function() {
+
+        document.getElementById("xml-content").style.overflow = "auto";
+        document.getElementById("xml-content").textContent = localStorage.xmlFile;
+        document.getElementById("robots-boxes").style.display="none";
+      };
+
+      $scope.save_robot = function() {
+      	var a= true;
+      	var x=1;
+      	var robot_mapping = [];
+      	var mapp = {};
+      	var fileName = localStorage.xmlFileName.toString();
+      	while (a== true){
+      		var id ="checkbox-" + x;
+          	var box = document.getElementById(id);
+          	if (box == undefined){
+          		a=false;
+			}
+			else{
+				x += 1;
+				if (box.checked){
+					robot_mapping.push(id);
+			}}
+		}
+		mapp[fileName] = robot_mapping;
+        var robots = JSON.parse(localStorage.getItem("robots-array"));
+        robot_mapping.forEach(function (value) {
+		  robots.push(fileName +"  :  "+ value.replace("checkbox", "ROBOT"));
+          $scope.robotMapp.push(fileName +"  :  "+ value.replace("checkbox", "ROBOT"));
+
+        });
+        localStorage.setItem("robots-array", JSON.stringify(robots));
+
+      };
+
+
+      $scope.assign_robot = function() {
+        document.getElementById("xml-content").textContent = "";
+        document.getElementById("robots-boxes").style.display="block";
+
+
+      };
+
+      $scope.display_list = function() {
+        document.getElementById("buttons").hidden=true;
+        document.getElementById("kpis-list").style.display="block";
+      };
 
 		$scope.toggleAll = function() {
 			$timeout(function() {
@@ -100,6 +165,7 @@ angular.module('kpi', ['LocalStorageModule'])
 			}, 0);
 		}
 		$scope.loadData();
+      	$scope.loadRobots();
 	}).filter('findobj', function() {
 
 		return function(list, obj) {
