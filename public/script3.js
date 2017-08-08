@@ -1,180 +1,227 @@
-angular.module('kpi', ['LocalStorageModule'])
+angular.module('kpi', [])
 	.config(function($interpolateProvider) {
 		$interpolateProvider.startSymbol('//');
 		$interpolateProvider.endSymbol('//');
 	})
-	.controller('kpiCtrl', function($scope, $http, $timeout, localStorageService, $filter) {
+	.controller('kpiCtrl', function($scope, $http, $timeout, $filter, kpiSocket,$rootScope) {
+		 $scope.checkedequipment = [];
+		 $scope.checkedequipmentList = [];
 		$scope.xmlList = {};
 		$scope.xmlFile = "";
       	$scope.xmlFileName = "";
+		var globalData;
+		var tempoVal;
+		var kpiname;
 		$scope.selectRob = [];
-      	$scope.robotMapp = JSON.parse(localStorage.getItem("robots-array"));
-      	localStorage.setItem("robots-array", JSON.stringify([]));
+		$rootScope.Utils = {
+     keys : Object.keys
+  }
+  kpiSocket.on('test', function(msg) {
+
+ 	globalData = msg;
+ 	var message = msg;
+	//console.log(message);
+	google.charts.load('current', {
+ 		'packages': ['corechart']
+ 	});
+ 	google.charts.setOnLoadCallback(function() {
+
+ 		//console.log(message);
+ 		if (tempoVal) {
+ 			$scope.dataInfo(message, kpiname, tempoVal)
+ 		}
+
+ 	});
+ });
+		//$scope.equipmentlist = ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
+		//$scope.robotMapp =["abc.xml  :  ROBOT-2", "abc.xml  :  ROBOT-3"];
+    
 
 		var url = "http://localhost:3000/kpiValue/";
-		$scope.equipment = [{
-			name: "Robot 1",
-			status: 0
-		}, {
-			name: "Robot 2",
-			status: 0
-		}, {
-			name: "Robot 3",
-			status: 0
-		}, {
-			name: "Robot 4",
-			status: 0
-		}, {
-			name: "Robot 5",
-			status: 0
-		}, {
-			name: "Robot 6",
-			status: 0
-		}, {
-			name: "Robot 7",
-			status: 0
-		}, {
-			name: "Robot 8",
-			status: 0
-		}, {
-			name: "Robot 9",
-			status: 0
-		}, {
-			name: "Robot 10",
-			status: 0
-		}];
+		// $scope.equipment = [{
+		// 	name: "Robot 1",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 2",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 3",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 4",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 5",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 6",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 7",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 8",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 9",
+		// 	status: 0
+		// }, {
+		// 	name: "Robot 10",
+		// 	status: 0
+		// }];
 
-		$scope.loadData = function() {
+$scope.loadData = function() {
           $http.get(url + "getXmlList")
 				.then(function(response) {
 					$scope.xmlList = response.data.data;
-
 				});
+};
 
-		};
-      	$scope.loadRobots = function () {
-          $scope.robotMapp = JSON.parse(localStorage.getItem("robots-array"));
-        };
-
-		$scope.openXml = function(xmlFile) {
-          	document.getElementById("myModal").style.display="block";
-          	document.getElementById("xml-content").textContent="";
-			$scope.xmlFile = xmlFile;
-          	$scope.xmlFileName = xmlFile;
-			$http.get(url + "readXmlFile/" + xmlFile)
+$scope.getEquipmentlist = function() {
+          $http.get(url + "/assign-Equipment/xml")
 				.then(function(response) {
-					$scope.xmlFile = response.data.data;
-                  	localStorage.xmlFile = $scope.xmlFile;
-                  	localStorage.xmlFileName = $scope.xmlFileName;
-                  	$scope.selectRob = localStorageService.get($scope.xmlFile);
-					$scope.toggleAll();
+					$scope.equipmentlist = response.data;
+		console.log($scope.xmlFileName);
 				});
 
-		};
+};
 
-      $scope.close_dialog = function() {
-        document.getElementById("myModal").style.display="none";
+$scope.toggleCheck = function (equipment) {
+        if ($scope.checkedequipment.indexOf(equipment) === -1) {
+            $scope.checkedequipment.push(equipment);
+            console.log($scope.xmlFileName);
+			console.log($scope.checkedequipment);
+        } else {
+            $scope.checkedequipment.splice($scope.checkedequipment.indexOf(equipment), 1);
+        }
+};
 
-      };
-      $scope.view_xml = function() {
+$scope.save_equipment = function() {
+	var xmlFileName =$scope.xmlFileName;
+	console.log($scope.checkedequipment);
+	$scope.checkedequipment.sort();
+	$scope.checkedequipment.forEach(function (equipment){
+			var newobject = {};
+			var checkExistence = false;
+            newobject[xmlFileName] = equipment; 
+            if ($scope.checkedequipmentList.length){
+            $scope.checkedequipmentList.forEach(function (currentobject){
+		    if (angular.equals(newobject,currentobject) )
+						    {
+						    	checkExistence=true;
+						    }
+            });
+            if(!checkExistence){
+            		$scope.checkedequipmentList.push(newobject);
+            }
+            else{
 
-        document.getElementById("xml-content").style.overflow = "auto";
-        document.getElementById("xml-content").textContent = localStorage.xmlFile;
-        document.getElementById("robots-boxes").style.display="none";
-      };
-
-      $scope.save_robot = function() {
-      	var a= true;
-      	var x=1;
-      	var robot_mapping = [];
-      	var mapp = {};
-      	var fileName = localStorage.xmlFileName.toString();
-      	while (a== true){
-      		var id ="checkbox-" + x;
-          	var box = document.getElementById(id);
-          	if (box == undefined){
-          		a=false;
-			}
-			else{
-				x += 1;
-				if (box.checked){
-					robot_mapping.push(id);
-			}}
+            	alert(equipment + " Already exist for this " + xmlFileName);
+            } 
+        }
+        else 
+        {
+        	$scope.checkedequipmentList.push(newobject);
 		}
-		mapp[fileName] = robot_mapping;
-        var robots = JSON.parse(localStorage.getItem("robots-array"));
-        robot_mapping.forEach(function (value) {
-		  robots.push(fileName +"  :  "+ value.replace("checkbox", "ROBOT"));
-          $scope.robotMapp.push(fileName +"  :  "+ value.replace("checkbox", "ROBOT"));
+	});
+	$scope.checkedequipment= [];
+}; 
 
-        });
-        localStorage.setItem("robots-array", JSON.stringify(robots));
+$scope.deleteElement = function(indexNumber,equipmentname) {
+		$scope.checkedequipmentList.splice(indexNumber,1); 
+		if($scope.equ== equipmentname){
+ 		document.getElementById('mychart').style.display = 'none';
+		}	
+};
 
-      };
+$scope.openXml = function(xmlFile) {
+        document.getElementById("myModal").style.display="block";
+        document.getElementById("xml-content").textContent=$scope.xmlFile;
+		$scope.xmlFile = xmlFile;
+        $scope.xmlFileName = xmlFile;
+		$http.get(url + "readXmlFile/" + xmlFile)
+		.then(function(response) {
+		$scope.xmlFile = response.data.data;
+		document.getElementById("xml-content").textContent=$scope.xmlFile;
+				});
+};
 
+$scope.close_dialog = function() {
+        document.getElementById("myModal").style.display="none";
+};
 
-      $scope.assign_robot = function() {
-        document.getElementById("xml-content").textContent = "";
+$scope.view_xml = function() {
+        document.getElementById("xml-content").style.overflow = "auto";
+        document.getElementById("xml-content").style.display="block";
+       //document.getElementById("xml-content").textContent = $scope.xmlFile;
+        document.getElementById("robots-boxes").style.display="none";
+};
+
+$scope.assign_robot = function() {
+       // document.getElementById("xml-content").textContent = "";
+         document.getElementById("xml-content").style.display="none";
         document.getElementById("robots-boxes").style.display="block";
+};
 
-
-      };
-
-      $scope.display_list = function() {
+$scope.display_list = function() {
         document.getElementById("buttons").hidden=true;
         document.getElementById("kpis-list").style.display="block";
-      };
+};
 
-		$scope.toggleAll = function() {
-			$timeout(function() {
-				var toggleStatus = 0; //!$scope.isAllSelected;
-				angular.forEach($scope.equipment, function(itm) {
-					itm.status = toggleStatus;
+$scope.visualize = function(kpi, equipment){
+	console.log("Kpi", kpi);
+	console.log("equipment", equipment);
+};
 
-					if ($scope.selectRob && angular.isDefined($scope.selectRob.selectVal)) {
-						var found = _.find($scope.selectRob.selectVal, function(num) {
-							return num.name == itm.name;
-						});
-						
-						if(found && angular.isDefined(found.name)){
-							itm.status = 1;
-							console.log(found,itm);
-						}
-						
-					}
-						
 
-				});
-				//console.log($scope.equipment);
-			}, 0);
-		};
+$scope.showChart = function(viewkpi, equ) {
+	$scope.equ=equ;
+var checkvalues = ["Robot", "Conveyor"]
+var i;
+checkvalues.forEach(function (value){
+	console.log(value);
+	if(equ.match(value)){
+		console.log("value is ", value);
+		 i= parseInt(equ.replace(value, ""));
+		
+	}
+}); 
+var id = 'mychart';
+ 	tempoVal = i;
+	kpiname = viewkpi;
+ 	$scope.dataInfo(globalData, viewkpi, i);
+ 	if (document.getElementById(id).style.display == "none") {
+ 		document.getElementById(id).style.display = 'block';
+ 	} 
+ };
+ 
+$scope.dataInfo = function(message,kpi, j){
+	console.log(kpi);
+	var rob_number = "ROB" + j + "_" + kpi;
+ 	var ROB_AvailabilityData = google.visualization.arrayToDataTable([
+ 		['Task', 'Hours per Day'],
+ 		['Busy', message[kpi][j - 1][rob_number]],
+ 		['Idle', 100 - message[kpi][j - 1][rob_number]]
+ 	]);
+ 	var options1 = {
+ 		title: rob_number,
+ 		pieSliceText: 'label',
+ 		is3D: true,
+		backgroundColor: 'transparent',
+ 		slices: {
+ 			0: {
+ 				offset: 0.2
+ 			}
+ 		},
+ 	};
+ 	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
+ 	chart1.draw(ROB_AvailabilityData, options1);
 
-		$scope.saveValue = function() {
-			$timeout(function() {
-				var chkValue = [];
-				angular.forEach($scope.equipment, function(itm) {
-					if (itm.status) {
-						chkValue.push(itm);
-					}
 
-				});
-				localStorageService.set($scope.xmlFile, {
-					selectVal: chkValue
-				});
+ };
+ 
 
-			}, 0);
-		}
-		$scope.loadData();
-      	$scope.loadRobots();
-	}).filter('findobj', function() {
 
-		return function(list, obj) {
+$scope.loadData();
 
-			return list.filter(function(l) {
-				if (obj.indexOf(l.name) >= 0) {
-					return true;
-				}
-			});
-
-		};
-	});
+});

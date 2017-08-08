@@ -463,7 +463,7 @@ io.on('connection',IO_Socket);
 	socket.on('Event',function(msg){
 		//console.log(msg);
 		REST_POST('http://localhost:3000/kpi/data',msg);
-		//console.log("HELLO USMAN you are clever.");
+		
 		//Now go to your KPI extension and interact with me.
 		var dd = new Date();
 		var d = dd.getTime();

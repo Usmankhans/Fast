@@ -10,6 +10,7 @@ var events = require('events');
 var eventEmitt = new events.EventEmitter();
 var http = require('http');
 var request = require('request');
+var path = require('path');
 //var xml2js = require('xml2js');
 //var parser = new xml2js.Parser();
 var querystring = require('querystring');
@@ -33,7 +34,7 @@ eventEmitt.on('Intialization', function() {
 
 });
 
-var Equipment = ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
+var equipmentlist = ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
 
 
 var listkpi = ["Availability", "Setup rate", "Effective", "usman"];
@@ -45,13 +46,17 @@ router.get('/list', function(req, res, next) {
 
 router.get('/getXmlList', function(req, res, next) {
 	fs.readdir('public/xmlfile', (err, files) => {
-		res.send({data:files});
+		var fileslist =[];
+  	files.forEach(function(entry) {
+fileslist.push(path.basename(entry, '.xml')); // hello
+}); 
+		res.send({data:fileslist});
 	});
 });
 
 router.get('/readXmlFile/:file_name', function(req, res, next) {
-	
-	fs.readFile('public/xmlfile/'+req.params.file_name, 'utf8', function(err, data) {
+	var filename = req.params.file_name + '.xml';
+	fs.readFile('public/xmlfile/'+filename, 'utf8', function(err, data) {
 		res.send({data:data});
 	});
 	
@@ -64,9 +69,9 @@ router.get('/sample', function(req, res, next) {
 	});
 
 });
-router.get('/assign-Equipment', function(req, res, next) {
+router.get('/assign-Equipment/:kpiname', function(req, res, next) {
 
-	res.send(Equipment);
+	res.send(equipmentlist);
 
 	//res.send(data);
 });

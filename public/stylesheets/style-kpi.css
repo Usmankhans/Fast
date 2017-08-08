@@ -13,8 +13,9 @@ a{
 pre{
     background-color:ghostwhite;
     border:1px solid silver;
-    padding:10px 20px;
-    margin:20px
+    white-space: pre;
+	margin:20px;
+} 
 }
 .json-key{
     color:brown;
@@ -137,7 +138,7 @@ div#hmenu ul a:visited{
 }
 div#hmenu ul a:active{
     margin:0;
-    padding:.3em .4em .3em .4em;
+    padding:.3em .4em .3em .4em; 
     text-decoration:none;
     font-weight:bold;
     font-size:large;
@@ -159,9 +160,66 @@ div#main p{
 }
 .panel-item{
     margin-left: 0px !important;
-    width: 248px;
+    
 }
 .ul-special{
     float:left;
     margin:0 5px;
+}
+.navbar{
+	background-color:rgb(7, 84, 186);
+	font-size: 18px;
+	font-weight: bold;
+	color: white;
+}
+
+.navbar-fixed-left {
+  width: 300px;
+  position: fixed;
+  border-radius: 0;
+  height: 100%;
+}
+
+.navbar-fixed-left .navbar-nav > li {
+  float: none;  /* Cancel default li float: left */
+  width: 250px;
+}
+
+.navbar-fixed-left + .container {
+  padding-left: 200px;
+}
+
+/* On using dropdown menu (To right shift popuped) */
+.navbar-fixed-left .navbar-nav > li > .dropdown-menu {
+  margin-top: -50px;
+  margin-left: 140px;
+}
+
+.navbar-fixed-left .navbar-nav > li > .dropdown-menu >li > a{
+ background-color:white;
+ font-size:20px;
+}
+ol#robots-boxes {
+	margin-top:-100px;
+}
+#xml-content{
+	margin-top:-50px;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+th {
+	font-size: 16px;
+	text-transform: capitalize;
+	}
+tr:hover {
+  background-color: rgba(0, 0, 0, .1) /* $table-bg-hover */
 }

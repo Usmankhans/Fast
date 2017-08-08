@@ -89,7 +89,7 @@ var rob_number = "ROB" + i + "_Availability";
 		}
  	});
 } //getData End
-
+    
 /******************************************Update Data Set Function(Sending POST Request to Fuseki Server)****************************/
 function updateDS(secs, ws_number) {
 	var updateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> insert {[] test:Kpi_Variable ?s; test:hasValue_ROB" + ws_number + "?p; test:hasTime ?now.} where {values (?s ?p ) {(test:Actual_Production_Time " + secs + ")} bind (now() as ?now)}";
@@ -116,7 +116,7 @@ function updateDS(secs, ws_number) {
 
 /**************************************** Recieves Post Notification from Simulator whenever something changes on the simulator*****************************************/
 router.post('/data', function(req, res) {
-	res.end();
+	res.end(); 
 	console.log(req.body);
 	var notif = req.body;
 
