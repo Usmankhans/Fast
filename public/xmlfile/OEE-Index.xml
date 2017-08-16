@@ -7,9 +7,9 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <ID>OLR100</ID> 
  <Description> The actual usage and availability of the planned capacity of a machine, which is measured by the ratio of AUBT to planned unit busy time (PBT). The complementary part is the percentage of actual unit downtime. 
  </Description> 
- <Name>Availability</Name> 
+ <Name>Allocation Efficiency (AE)</Name> 
  <Scope> Work unit </Scope>  
- <Formula>Availability = Actual Unit Busy Time/Planned Busy Time</Formula> 
+ <Formula>Allocation efficiency = Actual Unit Busy Time/Planned Busy Time</Formula> 
  <UnitOfMeasure>%</UnitOfMeasure> 
  <Range> 
  <ID>Natural</ID> 

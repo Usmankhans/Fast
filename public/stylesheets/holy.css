@@ -1,5 +1,32 @@
+.HolyGrail {
+  display: flex;
+  min-height: 67vh;
+  flex-direction: column;
 
+}
 
+.HolyGrail-body {
+  display: flex;
+  flex: 1;
+  
+   background: #ddeeff;
+}
+.HolyGrail-content {
+  flex: 1;
+}
+
+.HolyGrail-nav{
+  /* 12em is the width of the columns */
+  flex: 0 0 25em;
+}
+.HolyGrail-ads {
+  /* 12em is the width of the columns */
+  flex: 0 0 30em;
+}
+.HolyGrail-nav {
+  /* put the nav on the left */
+  order: -1;
+}
 
 @import url('//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css');
 
@@ -12,7 +39,9 @@
     -moz-transition: all .5s ease;
     -o-transition: all .5s ease;
     transition: all .5s ease;
+	 height: 100%;
 	
+	   color:black ;
 }
 /*
 @media (min-width: 480px) {
@@ -28,6 +57,9 @@
 }
 */
 #sidebar-wrapper {
+ 
+ height: 100%;
+ 
 
 }
 
@@ -42,16 +74,17 @@
 }
 
 #sidebar-wrapper .sidebar-nav {
-   
+ 
 
-    width: 225px;
-    font-size: 14px;
+    width: 100%;
+    font-size: 20px;
     list-style: none;
 }
 
 #sidebar-wrapper .sidebar-nav li {
     text-indent: 0;
-    line-height: 45px;
+    line-height: 70px;
+	 line-width:100%;
 }
 
 #sidebar-wrapper .sidebar-nav li a {
@@ -76,6 +109,16 @@
     color: #fff;
    /* float: left; */
 }
+
+
+
+
+
+
+
+
+
+
 
 #sidebar-wrapper .sidebar-nav li a .caret {
  /*  position: absolute;
@@ -147,9 +190,6 @@
     color: #fff !important;
 } 
 
-
-
-
 ol#robots-boxes {
 	margin-top:-100px;
 }
@@ -160,7 +200,6 @@ table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
     width: 100%;
-	
 }
 
 td, th {
@@ -202,7 +241,4 @@ a:hover{
     padding:.3em .4em .3em .4em;
     text-decoration:none;
 }
-
-
-
 

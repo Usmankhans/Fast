@@ -15,6 +15,7 @@ var http = require("http");
 var Rob8;
 var Res_obj;
 var myarr = [];
+var view_arr=[];
 var KPIs = {
     Availability: [{
         ROB1_Availability: 0
@@ -48,7 +49,7 @@ var KpiValues;
 
 
 /******************************************GET Data from the DATA Set Function(Sending GET Request to Fuseki Server)****************************/
-function getData(i) {
+ function getInitialData(i) {
 
 var rob_number = "ROB" + i + "_Availability";
  	var getQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>SELECT ?s ?p ?time { [] test:Kpi_Variable ?s; test:hasValue_ROB" + i + " ?p; test:hasTime ?time. FILTER(?s= test:Actual_Production_Time) } order by ?time";
@@ -75,21 +76,89 @@ var rob_number = "ROB" + i + "_Availability";
                   
  			i++;
  			if (i < 13) {
- 				getData(i);
+ 				getInitialData(i);
  			}
+			io.emit('test', KPIs);
  		}
  		else {
 
  			if (i < 12) {
  				i++;
- 				getData(i);
+ 				getInitialData(i);
  			}
+			//console.log(response.statusCode)
+	 		//console.warn(error);
+		}
+ 	});
+}  //getData End
+    
+/***********************************************get data from fuseki server*****************************/
+	
+function getData(i)	{
+	var rob_number = "ROB" + i + "_Availability";
+ 	var getQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>SELECT ?s ?p ?time { [] test:Kpi_Variable ?s; test:hasValue_ROB" + i + " ?p; test:hasTime ?time. FILTER(?s= test:Actual_Production_Time) } order by ?time";
+ 	var myquery1 = qs.stringify({
+ 		query: getQuery
+ 	});
+ 
+ 	request.get('http://localhost:3030/DS-1/sparql?' + myquery1 + '&format=json', function(error, response, body) {
+ 		if (!error && response.statusCode == 200) {
+
+ 				var parseit = JSON.parse(body);
+ 			var Blength = parseit.results.bindings.length;
+ 			var Total_time_ROB = 0;
+ 			myarr = new Array();
+ 			for (var j = 0; j < Blength; j++) {
+ 				var time_parsed = parseFloat(parseit.results.bindings[j].p.value)
+ 				myarr.push(time_parsed);
+ 				Total_time_ROB = time_parsed + Total_time_ROB;
+ 			}
+
+ 		
+ 			var TTR= parseFloat(((Total_time_ROB / 600) * 100).toFixed(2));
+ 			KPIs["Availability"][i-1][rob_number] = TTR;
+			io.emit('test', KPIs);
+                  
+ 		}
+ 		else {
+
 			//console.log(response.statusCode)
 	 		console.warn(error);
 		}
  	});
-} //getData End
-    
+} 
+	
+	function updateView(Kpi, EquipmentName) {
+	 console.log(EquipmentName);
+	var viewUpdateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>INSERT DATA{ test:"+Kpi+" test:isViewed '"+EquipmentName+"'}";
+
+	var viewUpdate = qs.stringify({
+		update: viewUpdateQuery
+	});
+
+	request.post({
+		headers: {
+			'content-type': 'application/x-www-form-urlencoded'
+		},
+		url: 'http://localhost:3030/DS-1/?' + viewUpdate
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log('successful update');
+		} else {
+			//console.log(response.statusCode)
+			console.warn(error);
+		}
+	});
+}  
+	
+	
+	
+	
+	
+	
+	
+	
+	
 /******************************************Update Data Set Function(Sending POST Request to Fuseki Server)****************************/
 function updateDS(secs, ws_number) {
 	var updateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> insert {[] test:Kpi_Variable ?s; test:hasValue_ROB" + ws_number + "?p; test:hasTime ?now.} where {values (?s ?p ) {(test:Actual_Production_Time " + secs + ")} bind (now() as ?now)}";
@@ -106,6 +175,7 @@ function updateDS(secs, ws_number) {
 	}, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			console.log('successful update');
+			getData(ws_number);
 			//console.log(body);
 		} else {
 			//console.log(response.statusCode)
@@ -113,6 +183,72 @@ function updateDS(secs, ws_number) {
 		}
 	});
 } //updateDS End
+
+
+function deleteData(deleteEquipmentList){
+	 var checkvalues = ["Robot", "Conveyor"];
+	var ie;
+	console.log("in function: ",deleteEquipmentList);
+	deleteEquipmentList.forEach(function (equipment){
+	checkvalues.forEach(function (value){
+	console.log(value);
+	if(equipment.match(value)){
+		console.log("value is ", value);
+		 ie=(parseInt(equipment.replace(value, "")));
+		 console.log(ie);
+		 var deleteQuery="PREFIX test: <http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> DELETE { ?b  test:Kpi_Variable ?s ; test:hasValue_ROB"+ie+" ?p ; test:hasTime ?t . } WHERE { ?b  test:Kpi_Variable ?s ; test:hasValue_ROB"+ie+" ?p ; test:hasTime ?t . FILTER (?t < now())FILTER (isBlank(?b))VALUES (?s) { (test:Actual_Production_Time)}}";
+	
+	
+	var myquery3 = qs.stringify({
+		update: deleteQuery
+	});
+
+	request.post({
+		headers: {
+			'content-type': 'application/x-www-form-urlencoded'
+		},
+		url: 'http://localhost:3030/DS-1/?' + myquery3
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log('successful update');
+			//console.log(body);
+		} else {
+			//console.log(response.statusCode)
+			console.warn(error);
+		}
+	});
+		
+	}
+	});
+	}); 
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**************************************** Recieves Post Notification from Simulator whenever something changes on the simulator*****************************************/
 router.post('/data', function(req, res) {
@@ -718,8 +854,67 @@ router.post('/data', function(req, res) {
 
 }); //router.post End
 
+router.post('/deleteData', function(req, res) {
+	var deleteEquipmentList= req.body;
+	console.log(deleteEquipmentList);
+		deleteData(deleteEquipmentList);
+		
+});
+
+router.get('/viewData',function(req, res) {
+	console.log('Initial data');
+	var viewQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> SELECT  ?KPIs ?equipments where {?KPIs test:isViewed ?equipments}";
+ 	var myquery5 = qs.stringify({
+ 		query: viewQuery
+ 	});
+ 
+ 	request.get('http://localhost:3030/DS-1/sparql?' + myquery5 + '&format=json', function(error, response, body) {
+ 		if (!error && response.statusCode == 200) {
+//console.log(JSON.parse(body));
+ 				var viewjson = JSON.parse(body);
+ 			var viewlength = viewjson.results.bindings.length;
+			var bindings = viewjson.results.bindings;
+			var checkedequipmentList = [];
+			bindings.forEach(function(kpiinitial){
+				var stringjson = kpiinitial.KPIs.value;
+			var res = stringjson.split("#");
+			var	kpiView=  res.splice(1,2);
+			console.log(kpiView);
+			var newobject = {};
+            newobject[kpiView[0]] = kpiinitial.equipments.value;
+			checkedequipmentList.push(newobject);
+			console.log(checkedequipmentList);
+			});
+ 			//console.log(viewjson.results.bindings[0].KPIs);
+			
+			
+		
+ 		
+ 			/* for (var j = 0; j < viewlength; j++) {
+ 				var viewelements = parseFloat(viewjson.results.bindings[j].p.value)
+ 				view_arr.push(viewelements);
+				
+ console.log(view_arr);
+ 			} */
+			res.send(checkedequipmentList)
+
+ 		}
+ 		else {
+	 		console.warn(error);
+		}
+ 	});
+	
+});
 
 
+router.post('/insertView',function(req, res) {
+	var viewEquipmentList= req.body;
+	console.log(viewEquipmentList);
+	updateView(req.body.xmlFileName, req.body.checkedequipment);
+	res.send("I got it");
+	
+		
+});
 var io;
 fs.readFile('public/Configuration.json', 'utf8', function(err, data) {
 	Configuration = JSON.parse(data);
@@ -733,15 +928,15 @@ eventEmitt.on('Intialization', function() {
 	var server = http.createServer(app);
 	server.listen(Configuration.SocketPort3);
 	io = require('socket.io')(server);
-
-	setInterval(function() {
+getInitialData(1);
+	/* setInterval(function() {
 		getData(1);
 
 	}, 250);
-
-	setInterval(function() {
+*/
+	 setInterval(function() {
 		io.emit('test', KPIs);
-	}, 100);
+	}, 100);  
 });
 
 

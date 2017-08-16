@@ -5,11 +5,14 @@ xsi:schemaLocation=http://www.mesa.org/xml/KPI-ML-V01 KPI-ML-V01.xsd
 xmlns="http://www.mesa.org/xml/KPI-ML-V01" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> 
  <ID>OLR100</ID> 
- <Description> The actual usage and availability of the planned capacity of a machine, which is measured by the ratio of AUBT to planned unit busy time (PBT). The complementary part is the percentage of actual unit downtime. 
+ <Description> The Other Loss ratio is the relationship of the 
+ quantity of loss not related to production, storage or 
+ transportation (OL) to the quantity of Consumed Material (CM). 
  </Description> 
- <Name>Availability</Name> 
- <Scope> Work unit </Scope>  
- <Formula>Availability = Actual Unit Busy Time/Planned Busy Time</Formula> 
+ <Name>Other Loss Ratio</Name> 
+ <Scope> Work unit </Scope> 
+ <Scope> defect type </Scope> 
+ <Formula>Other loss ratio = OL/CM</Formula> 
  <UnitOfMeasure>%</UnitOfMeasure> 
  <Range> 
  <ID>Natural</ID> 
@@ -17,14 +20,17 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <LowerLimit>0</LowerLimit> 
  <UpperLimit>100</UpperLimit> 
  </Range> 
- <Trend>Higher-is-better</Trend> 
+ <Trend>Lower-is-better</Trend> 
  <Timing>On-demand</Timing> 
+ <Timing>Periodically</Timing> 
  <Timing>Real-time</Timing> 
  <Audience>Operator</Audience> 
  <Audience>Supervisor</Audience> 
  <Audience>Management</Audience> 
  <ProductionMethodology>Batch</ProductionMethodology> 
  <ProductionMethodology>Continuous</ProductionMethodology> 
- <Notes>”The actual usage and availability of the planned capacity of a machine, which is measured by the ratio of AUBT to planned unit busy time (PBT).” 
+ <Notes>” The other loss ratio evaluates losses that have not occurred 
+ during production, storage, or transportation. 
+ See also production loss ratio” 
  </Notes> 
 </KPIDefinition> 

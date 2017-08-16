@@ -5,6 +5,7 @@ angular.module('kpi', [])
 	})
 	.controller('kpiCtrl', function($scope, $http, $timeout, $filter, kpiSocket,$rootScope) {
 		 $scope.checkedequipment = [];
+		  $scope.checkedequipment1 = [];
 		 $scope.checkedequipmentList = [];
 		$scope.xmlList = {};
 		$scope.xmlFile = "";
@@ -81,7 +82,16 @@ $scope.getEquipmentlist = function() {
           $http.get(url + "/assign-Equipment/xml")
 				.then(function(response) {
 					$scope.equipmentlist = response.data;
-		console.log($scope.xmlFileName);
+		//console.log($scope.xmlFileName);
+				});
+
+};
+
+$scope.getEquipmentlistDelete = function() {
+          $http.get(url + "list")
+				.then(function(response) {
+					$scope.equipmentlistDelete = response.data;
+		//console.log($scope.xmlFileName);
 				});
 
 };
@@ -96,11 +106,60 @@ $scope.toggleCheck = function (equipment) {
         }
 };
 
+
+$scope.toggleCheck1 = function (equipment) {
+        if ($scope.checkedequipment1.indexOf(equipment) === -1) {
+            $scope.checkedequipment1.push(equipment);
+			console.log($scope.checkedequipment1);
+        } else {
+            $scope.checkedequipment1.splice($scope.checkedequipment1.indexOf(equipment), 1);
+			console.log($scope.checkedequipment1);
+        }
+};
+
+$scope.deleteData=function (equipment) {
+      console.log($scope.checkedequipment1);
+	  $http.post("http://localhost:3000/kpi/deleteData",$scope.checkedequipment1 )
+				.then(function(response) {
+					console.log(response);
+				});
+           
+};
+ /* $scope.updateDS =function(Kpi, EquipmentName) {
+	 
+	 
+	 $http.post("http://localhost:3000/kpi/deleteData",$scope.checkedequipment1)
+	var updateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>INSERT DATA{ test:"+Kpi+" test:isViewed"+EquipmentName+"}";
+
+	var myquery2 = qs.stringify({
+		update: updateQuery
+	});
+
+	request.post({
+		headers: {
+			'content-type': 'application/x-www-form-urlencoded'
+		},
+		url: 'http://localhost:3030/DS-1/?' + myquery2
+	}, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log('successful update');
+		} else {
+			//console.log(response.statusCode)
+			console.warn(error);
+		}
+	});
+}  
+ */
 $scope.save_equipment = function() {
 	var xmlFileName =$scope.xmlFileName;
 	console.log($scope.checkedequipment);
 	$scope.checkedequipment.sort();
 	$scope.checkedequipment.forEach(function (equipment){
+		var dataToSend = {
+						'checkedequipment': equipment,
+						'xmlFileName': xmlFileName
+						
+					};
 			var newobject = {};
 			var checkExistence = false;
             newobject[xmlFileName] = equipment; 
@@ -113,6 +172,13 @@ $scope.save_equipment = function() {
             });
             if(!checkExistence){
             		$scope.checkedequipmentList.push(newobject);
+					console.log(equipment);
+					
+					$http.post("http://localhost:3000/kpi/insertView",dataToSend )
+				.then(function(response) {
+					console.log(response);
+					});
+					//$scope.updateDS(xmlFileName, equipment );
             }
             else{
 
@@ -122,8 +188,13 @@ $scope.save_equipment = function() {
         else 
         {
         	$scope.checkedequipmentList.push(newobject);
+			$http.post("http://localhost:3000/kpi/insertView",dataToSend )
+				.then(function(response) {
+					console.log(response);
+					});
 		}
 	});
+	console.log($scope.checkedequipmentList);
 	$scope.checkedequipment= [];
 }; 
 
@@ -176,7 +247,7 @@ $scope.visualize = function(kpi, equipment){
 
 $scope.showChart = function(viewkpi, equ) {
 	$scope.equ=equ;
-var checkvalues = ["Robot", "Conveyor"]
+var checkvalues = ["Robot", "Conveyor"];
 var i;
 checkvalues.forEach(function (value){
 	console.log(value);
@@ -220,8 +291,36 @@ $scope.dataInfo = function(message,kpi, j){
 
  };
  
+var init= function()
+{
+	$http.get("http://localhost:3000/kpi/viewData")
+				.then(function(response) {
+					$scope.checkedequipmentList = response.data;
+		console.log(response.data);
+		
+				});
+}
 
-
+init();
 $scope.loadData();
 
 });
+
+/* PREFIX test: <http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>
+
+DELETE
+  {
+  ?b  test:Kpi_Variable ?s ;
+      test:hasValue_ROB1 ?p ;
+      test:hasTime ?t .
+  }
+WHERE
+  {
+  ?b  test:Kpi_Variable ?s ;
+      test:hasValue_ROB1 ?p ;
+      test:hasTime ?t .
+  FILTER (?t < now())
+  FILTER (isBlank(?b))
+  # ...
+  VALUES (?s) { (test:Actual_Production_Time) }
+  } */

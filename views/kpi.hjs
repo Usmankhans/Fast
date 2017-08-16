@@ -27,7 +27,7 @@
 	
 <script src="services.js"></script>
 </head>
-  <body ng-app="kpi" ng-controller="kpiCtrl">
+  <body ng-app="kpi" ng-controller="kpiCtrl" data-ng-init='init()'>
 		<div style="background-color:#0066dd; width:100% ;height:70px;text-align: center;">
 			<img src="tty-logo-TTYINTERNETEN-png.png" alt="Logo" style="width:400px;height:70px;float: left">
 			<img src="eScoplogo-white.png" alt="Logo" title="escop-project.com" style="width:194px;height:70px;float: right; cursor:pointer;">
@@ -103,7 +103,7 @@
 	
 	
 	
-	<div class="wrapper">
+	<!-- <div class="wrapper">
   <nav class="vertical" style=" overflow:true;" >
     <ul  >
       <li  >
@@ -135,20 +135,120 @@
       </li>
     </ul>
   </nav>
-</div>
+</div> -->
 	
-	
+
+    <div id="wrapper">
+        <div id="sidebar-wrapper">
+            <aside id="sidebar">
+                <ul id="sidemenu" class="sidebar-nav">
+                    <li>
+                        <a href="#">
+                            <span class="sidebar-icon"><i class="fa fa-dashboard"></i></span>
+                            <span class="sidebar-title">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-2">
+                            <span class="sidebar-icon"><i class="fa fa-users"></i></span>
+                            <span class="sidebar-title">Existing KPIs</span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul id="submenu-2" class="panel-collapse collapse panel-switch" role="menu">
+                            
+							<li> <a href="#" ng-repeat="xml in xmlList" ng-click="openXml(xml)" data-toggle="modal" data-target=".kpimodal"><i class="fa fa-caret-right"></i>  //xml//
+					</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li>
+					
+					 <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-3">
+                            <span class="sidebar-icon"><i class="fa fa-database"></i></span>
+                            <span class="sidebar-title">Creat New KPI</span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul id="submenu-3" class="panel-collapse collapse panel-switch" role="menu">
+                            
+							<li><a href="#"><i class="fa fa-caret-right"></i>  Upload XML
+					</a></li>
+					<li><a href="#"><i class="fa fa-caret-right"></i>  Fill KPI Description FOrm
+					</a></li>
+                        </ul>
+						
+                    </li>
+					
+					
+					<li>
+					
+					 <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-4">
+                            <span class="sidebar-icon"><i class="w3-margin-left fa fa-trash"></i></span>
+                            <span class="sidebar-title">Reset Data</span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul id="submenu-4" class="panel-collapse collapse panel-switch" role="menu">
+                            
+							<li> <a href="#" ng-click="openXml(xml)" data-toggle="modal" data-target=".resetModal"><i class="fa fa-caret-right"></i>  Robots
+					</a></li>
+					<li><a href="#"><i class="fa fa-caret-right"></i> Conveyors
+					</a></li>
+                        </ul>
+						
+                    </li>
+                </ul>
+            </aside>            
+        </div>
+        <main id="page-content-wrapper" role="main">
+        </main>
+    </div> 
 			</nav>
     <main class="HolyGrail-content">
 	
-	<h1 style= "padding:20px;" > KPI Visualization Panel</h1>
+	<h1 style= "padding:20px;"> KPI Visualization Panel</h1>
 	<div id="mychart" style="display:none;">     
    <div id="piechart" style="width:900px; height: 500px;"></div>
 	</div>
 	
-	<div class="modal fade kpimodal" id="myModal" role="dialog" style="display: none;margin-top: 150px;" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal fade resetModal" id="myModal" role="dialog" style="display: none;margin-top: 150px;" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	 <!-- <div id="myModal" class="modal" style="display: none;margin-top: 150px;" role="dialog"> -->
   <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title">Reset</h1>
+        <button type="button" id="btn-close" ng-click="close_dialog()" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+       <pre style="height: 200px !important;"> 
+                        <ol id="robots-boxes1">
+            <li ng-repeat= "equipment in equipmentlistDelete"><input type="checkbox"  ng-checked="checkedequipment1.indexOf(equipment) != -1" ng-click="toggleCheck1(equipment)"/> //equipment//</li>
+                        </ol>
+               </pre> 
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" ng-click="deleteData(); close_dialog() " class="btn btn-default" style="background-color: #0066dd; width: 65px;color:#ddeeff" data-dismiss="modal">Delete</button>
+                    <button type="button" ng-click="getEquipmentlistDelete();" class="btn btn-default" style="background-color: #0066dd; float: left; width: 65px;color:#ddeeff">Assign</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="modal fade kpimodal" id="myModal" role="dialog" style="display: none;margin-top: 150px;" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	 <!-- <div id="myModal" class="modal" style="display: none;margin-top: 150px;" role="dialog"> -->
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title">//xmlFileName//</h1>
@@ -178,10 +278,10 @@
     
     <aside class="HolyGrail-ads">
 	
-            <h1 >KPI-ROBOT Mapping</h1>
+            <h1 style= "padding:20px;">KPI-ROBOT Mapping</h1>
  
 
-            <table class="table table-responsive table-inverse">
+            <table class="table table-striped table-bordered table-hover table-responsive">
     <thead>
         <tr>
             <th  style="width: 135px">KPI</th>
@@ -199,6 +299,11 @@
 </table>
 	</aside>
   </div>
+  
+  
+  
+  
+
 			
 			
 			

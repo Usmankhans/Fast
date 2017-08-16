@@ -41,7 +41,7 @@ var listkpi = ["Availability", "Setup rate", "Effective", "usman"];
 
 router.get('/list', function(req, res, next) {
 
-	res.send(listkpi);
+	res.send(equipmentlist);
 });
 
 router.get('/getXmlList', function(req, res, next) {

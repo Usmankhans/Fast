@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{ title }} </title>
+    <script src="{{Host}}:{{SocketPort1}}/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel='stylesheet' href='/stylesheets/style-kpi.css' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+	
+	
+  <!--   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-local-storage/0.6.0/angular-local-storage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <!-- 		<script src="script4.js"></script>
+    -->		 <script src="{{Host}}:{{SocketPort1}}/socket.io/socket.io.js"></script> 
+
+     		<!-- <script src="Kpi-view.js"></script> -->
+    <script src="script3.js"></script>
+<script src="services.js"></script>
+</head>
+
+<body style="height:100%;" ng-app="kpi" ng-controller="kpiCtrl">
+
+<div style="background-color:#0066dd; width:100% ;height:70px;text-align: center;">
+    <img src="tty-logo-TTYINTERNETEN-png.png" alt="Logo" style="width:400px;height:70px;float: left">
+    <img src="eScoplogo-white.png" alt="Logo" title="escop-project.com" style="width:194px;height:70px;float: right; cursor:pointer;">
+    <h1 style="font-family:Verdana;font-size:420%;color:#ffffff;height:100%;position: relative;margin-top: 0em;margin-bottom: 0em;align:justify">FASTory Simulator</h1>
+</div>
+<div id="main">
+    <div id="hmenu">
+        <ul>
+            <li><a href="/" >Main Page</a></li>
+            <li>|</li>
+            <li><a href="/fmw">Simulator Interface</a></li>
+            <li>|</li>
+            <li><a href="/RTUs?url={{HostName}}/RTU">RTUs</a></li>
+            <li>|</li>
+            <li><a href="/instructions">Instructions</a></li>
+            <li>|</li>
+            <li><a href="/License">License Agreement</a></li>
+            <li>|</li>
+            <li><a href="/about">About</a></li>
+            <li>|</li>
+            <li><a href="/contacts">Contacts</a></li>
+            <li>|</li>
+            <li><a href="/kpi" style="border:1px solid #0066dd;">KPIs</a></li>
+        </ul>
+    </div>
+<div class="container-fluid" style="height:100%">
+
+
+    <div id="wrapper" class="col-lg-2">
+        <div id="sidebar-wrapper">
+            <aside id="sidebar">
+                <ul id="sidemenu" class="sidebar-nav">
+                    <li>
+                        <a href="#">
+                            <span class="sidebar-icon"><i class="fa fa-dashboard"></i></span>
+                            <span class="sidebar-title">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-2">
+                            <span class="sidebar-icon"><i class="fa fa-users"></i></span>
+                            <span class="sidebar-title">Existing KPIs</span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul id="submenu-2" class="panel-collapse collapse panel-switch" role="menu">
+							<li> <a href="#" ng-repeat="xml in xmlList" ng-click="openXml(xml)" data-toggle="modal" data-target=".kpimodal"><i class="fa fa-caret-right"></i>  //xml//
+					</a></li>
+							
+                        </ul>
+                    </li>
+                    <li>
+                        <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-3">
+                            <span class="sidebar-icon"><i class="fa fa-newspaper-o"></i></span>
+                            <span class="sidebar-title">Create New KPI</span>
+                            <b class="caret"></b>
+                        </a>
+                    </li>
+                </ul>
+            </aside>            
+        </div>
+    </div> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div class="navbar navbar-inverse bg-inverse navbar-fixed-left">
+  <a class="navbar-brand" href="#">KPI Menu</a>
+  <ul class="nav navbar-nav">
+   <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Existing KPIs<span class="caret"></span></a>
+     <ul class="dropdown-menu" role="menu">
+      <li> <a href="#" class="panel-item list-group-item" ng-repeat="xml in xmlList" ng-click="openXml(xml)" data-toggle="modal" data-target=".kpimodal">
+                    //xml//
+                </a></li>
+     </ul>
+   </li>
+   <li><a href="#">Create KPI</a></li>
+  </ul>
+</div> -->
+
+
+<!--     <div class="panel panel-info" style="border: 2px solid #9e9e9e;height: 464px; overflow: auto; background:#ddeeff;">
+
+        <div class="panel-heading">{{ title }}</div>
+        <div class="panel-body" style="padding: 0px !important;">
+            <div id="kpis-list" class="list-group" >
+                <a href="#" class="panel-item list-group-item" ng-repeat="xml in xmlList" ng-click="openXml(xml)">
+                    //xml//
+                </a>
+            </div>
+        </div>
+    </div>  -->
+
+	<div class="col-lg-7">
+	<h1> KPI Visualization Panel</h1>
+	<div id="mychart" style="display:none;">     
+   <div id="piechart" style="width:900px; height: 500px;"></div>
+	</div> 
+<!--     <div id="myModal" class="modal fade" style="display: none;margin-top: 150px;" role="dialog">
+	   <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+				 <h1 class="modal-title">//xmlFileName//</h1>
+                    <button type="button" id="btn-close" ng-click="close_dialog()" class="close" data-dismiss="modal">&times;</button>
+                    <h1 data-dismiss="modal">//xmlFileName// </h1> 
+					 <button type="button" ng-click="view_xml()" class="btn btn-default" style="background-color:#0066dd;width: 65px;color:#ddeeff" data-dismiss="modal">View</button>
+					<h5 class="modal-title">Modal title</h5>
+					
+                </div>
+ <div class="modal-body">
+                <pre style="height: 200px !important;"> 
+                    
+					<div style="overflow: auto; display: none;" id="xml-content" class="modal-body">//xmlFile//</div>
+                   
+                        <ol id="robots-boxes">
+            <li ng-repeat= "equipment in equipmentlist"><input type="checkbox"  ng-checked="checkedequipment.indexOf(equipment) != -1" ng-click="toggleCheck(equipment)"/> //equipment//</li>
+                        </ol>
+               </pre> 
+</div>
+                <div class="modal-footer">
+                    <button type="button" ng-click="save_equipment(); loadRobots(); close_dialog() " class="btn btn-default" style="background-color: #0066dd; width: 65px;color:#ddeeff" data-dismiss="modal">Done</button>
+                    <button type="button" ng-click="getEquipmentlist(); assign_robot()" class="btn btn-default" style="background-color: #0066dd; float: left; width: 65px;color:#ddeeff" data-dismiss="modal">Assign</button>
+                </div>
+            </div>
+
+        </div>
+    </div>  -->
+	
+	
+	
+	<div class="modal fade kpimodal" id="myModal" role="dialog" style="display: none;margin-top: 150px;" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	 <!-- <div id="myModal" class="modal" style="display: none;margin-top: 150px;" role="dialog"> -->
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title">//xmlFileName//</h1>
+        <button type="button" id="btn-close" ng-click="close_dialog()" class="close" data-dismiss="modal">&times;</button>
+		<button type="button" ng-click="view_xml()" class="btn btn-default" style="background-color:#0066dd;width: 65px;color:#ddeeff">View</button>
+      </div>
+      <div class="modal-body">
+       <pre style="height: 200px !important;"> 
+                    
+					<div style="overflow: auto; display: none;" id="xml-content" class="modal-body">//xmlFile//</div>
+                   
+                        <ol id="robots-boxes">
+            <li ng-repeat= "equipment in equipmentlist"><input type="checkbox"  ng-checked="checkedequipment.indexOf(equipment) != -1" ng-click="toggleCheck(equipment)"/> //equipment//</li>
+                        </ol>
+               </pre> 
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" ng-click="save_equipment(); loadRobots(); close_dialog() " class="btn btn-default" style="background-color: #0066dd; width: 65px;color:#ddeeff" data-dismiss="modal">Done</button>
+                    <button type="button" ng-click="getEquipmentlist(); assign_robot()" class="btn btn-default" style="background-color: #0066dd; float: left; width: 65px;color:#ddeeff">Assign</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	</div>
+	
+	
+	
+	
+	<div class="col-lg-3">
+       
+            <h1>KPI-ROBOT Mapping</h1>
+
+
+            <table class="table table-responsive">
+    <thead>
+        <tr>
+            <th  style="width: 135px">KPI</th>
+            <th style="width: 135px">Equipment</th>
+            <th style="width: 200px">Action</th>
+        </tr>
+    </thead>
+<tbody>
+<tr ng-repeat= "listelement in checkedequipmentList"> 
+<td> //Utils.keys(listelement)[0]//</td>
+<td> //listelement[Utils.keys(listelement)[0]]//</td>
+<td> <button class="btn btn-default" ng-click= "showChart(Utils.keys(listelement)[0], listelement[Utils.keys(listelement)[0]])">View</button> <button class="btn btn-default" ng-click= "deleteElement($index, listelement[Utils.keys(listelement)[0]])">Delete <i class="w3-margin-left fa fa-trash"></i></button></td>
+</tr>
+</tbody>
+</table>
+           
+        
+		 </div>
+</div>
+
+
+
+</div>
+
+
+</body>
+<footer>
+    <div style="background-color: #cccccc;text-align:center;color:#0066dd;bottom:0;width:100%;position:absolute">
+        <h3>Copyright (c) 2016 Tampere University of Technology</h3>
+        <h4>All Rights Reserved</h4>
+    </div>
+</footer>
+
+
+</html>
