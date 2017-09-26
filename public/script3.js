@@ -3,15 +3,18 @@ angular.module('kpi', [])
 		$interpolateProvider.startSymbol('//');
 		$interpolateProvider.endSymbol('//');
 	})
-	.controller('kpiCtrl', function($scope, $http, $timeout, $filter, kpiSocket,$rootScope) {
+	.controller('kpiCtrl', function($scope, $http, $timeout, $filter, kpiSocket,$rootScope, $window) {
 		 $scope.checkedequipment = [];
 		  $scope.checkedequipment1 = [];
 		 $scope.checkedequipmentList = [];
 		$scope.xmlList = {};
 		$scope.xmlFile = "";
+		$scope.xmlFile1 = "";
       	$scope.xmlFileName = "";
+		$scope.xmlFileName1 = "";
 		var globalData;
 		var tempoVal;
+		var tempoProperty;
 		var kpiname;
 		$scope.selectRob = [];
 		$rootScope.Utils = {
@@ -29,7 +32,7 @@ angular.module('kpi', [])
 
  		//console.log(message);
  		if (tempoVal) {
- 			$scope.dataInfo(message, kpiname, tempoVal)
+ 			$scope.dataInfo(message, kpiname, tempoVal, tempoProperty)
  		}
 
  	});
@@ -99,8 +102,7 @@ $scope.getEquipmentlistDelete = function() {
 $scope.toggleCheck = function (equipment) {
         if ($scope.checkedequipment.indexOf(equipment) === -1) {
             $scope.checkedequipment.push(equipment);
-            console.log($scope.xmlFileName);
-			console.log($scope.checkedequipment);
+          
         } else {
             $scope.checkedequipment.splice($scope.checkedequipment.indexOf(equipment), 1);
         }
@@ -110,18 +112,18 @@ $scope.toggleCheck = function (equipment) {
 $scope.toggleCheck1 = function (equipment) {
         if ($scope.checkedequipment1.indexOf(equipment) === -1) {
             $scope.checkedequipment1.push(equipment);
-			console.log($scope.checkedequipment1);
+			
         } else {
             $scope.checkedequipment1.splice($scope.checkedequipment1.indexOf(equipment), 1);
-			console.log($scope.checkedequipment1);
+			
         }
 };
 
 $scope.deleteData=function (equipment) {
-      console.log($scope.checkedequipment1);
+   
 	  $http.post("http://localhost:3000/kpi/deleteData",$scope.checkedequipment1 )
 				.then(function(response) {
-					console.log(response);
+					
 				});
            
 };
@@ -172,11 +174,11 @@ $scope.save_equipment = function() {
             });
             if(!checkExistence){
             		$scope.checkedequipmentList.push(newobject);
-					console.log(equipment);
+					
 					
 					$http.post("http://localhost:3000/kpi/insertView",dataToSend )
 				.then(function(response) {
-					console.log(response);
+				
 					});
 					//$scope.updateDS(xmlFileName, equipment );
             }
@@ -190,7 +192,7 @@ $scope.save_equipment = function() {
         	$scope.checkedequipmentList.push(newobject);
 			$http.post("http://localhost:3000/kpi/insertView",dataToSend )
 				.then(function(response) {
-					console.log(response);
+				
 					});
 		}
 	});
@@ -198,10 +200,24 @@ $scope.save_equipment = function() {
 	$scope.checkedequipment= [];
 }; 
 
-$scope.deleteElement = function(indexNumber,equipmentname) {
+$scope.deleteElement = function(indexNumber,equipmentname, kpiName) {
 		$scope.checkedequipmentList.splice(indexNumber,1); 
+		var dataForDelete={
+						'deleteEquipment': equipmentname,
+						'deleteXML': kpiName
+					};
+		$http.post("http://localhost:3000/kpi/deleteView",dataForDelete )
+				.then(function(response) {
+				
+					});
 		if($scope.equ== equipmentname){
  		document.getElementById('mychart').style.display = 'none';
+		$scope.equ="";
+		$scope.xmlFile1 = "";
+		$scope.xmlFileName1 = "";
+		$scope.Formula="";
+		$scope.Trend="";
+		
 		}	
 };
 
@@ -212,8 +228,37 @@ $scope.openXml = function(xmlFile) {
         $scope.xmlFileName = xmlFile;
 		$http.get(url + "readXmlFile/" + xmlFile)
 		.then(function(response) {
-		$scope.xmlFile = response.data.data;
+		$scope.xmlFile = response.data;
 		document.getElementById("xml-content").textContent=$scope.xmlFile;
+				});
+};
+$scope.openXml1 = function(xmlFile) {
+	$scope.xmlFileName1=xmlFile;
+		$http.get(url + "readXmlFile/" + xmlFile).then(function(response) {
+			if (document.implementation && document.implementation.createDocument) {
+                   $scope.xmlFile1  = new DOMParser().parseFromString(response.data, 'text/xml');
+				   console.log($scope.xmlFile1 );
+		$scope.Formula=$scope.xmlFile1.getElementsByTagName("Formula")[0].innerHTML;
+		console.log($scope.Formula);
+		$scope.Trend=$scope.xmlFile1.getElementsByTagName("Trend")[0].innerHTML;
+		console.log($scope.Trend);
+                }
+                else if (window.ActiveXObject) {
+                   $scope.xmlFile1 = new ActiveXObject("Microsoft.XMLDOM");
+                   $scope.xmlFile1.loadXML(response.data);
+				   
+		$scope.Formula=$scope.xmlFile1.getElementsByTagName("Formula")[0].innerHTML;
+		
+		$scope.Trend=$scope.xmlFile1.getElementsByTagName("Trend")[0].innerHTML;
+		
+                }
+                else
+                {
+                    alert('Your browser cannot handle this XML');
+                    return null;
+                }
+              
+		
 				});
 };
 
@@ -240,19 +285,37 @@ $scope.display_list = function() {
 };
 
 $scope.visualize = function(kpi, equipment){
-	console.log("Kpi", kpi);
-	console.log("equipment", equipment);
+	
 };
 
 
 $scope.showChart = function(viewkpi, equ) {
 	$scope.equ=equ;
+	var propertName;
 var checkvalues = ["Robot", "Conveyor"];
 var i;
 checkvalues.forEach(function (value){
 	console.log(value);
 	if(equ.match(value)){
 		console.log("value is ", value);
+		if(value=='Robot'){
+			propertName = 'hasValue_ROB'+parseInt(equ.replace(value, ""));
+			tempoProperty=propertName;
+			console.log("propertyname is ");
+			console.log(propertName);
+		}
+		else if(value=='Conveyor'){
+			propertName = 'hasValue_CNV'+parseInt(equ.replace(value, ""));
+			console.log("propertyname is ");
+			console.log(propertName);
+			tempoProperty=propertName;
+		}
+		else{
+			propertName = 'hasValue';
+			console.log("propertyname is ");
+			console.log(propertName);
+			tempoProperty=propertName;
+		}
 		 i= parseInt(equ.replace(value, ""));
 		
 	}
@@ -260,15 +323,39 @@ checkvalues.forEach(function (value){
 var id = 'mychart';
  	tempoVal = i;
 	kpiname = viewkpi;
- 	$scope.dataInfo(globalData, viewkpi, i);
+ 	$scope.dataInfo(globalData, viewkpi, i,propertName);
  	if (document.getElementById(id).style.display == "none") {
  		document.getElementById(id).style.display = 'block';
  	} 
  };
  
-$scope.dataInfo = function(message,kpi, j){
-	console.log(kpi);
-	var rob_number = "ROB" + j + "_" + kpi;
+$scope.dataInfo = function(message,kpi, j, propertName){
+	//console.log(message);
+	console.log("propertyname is ");
+	console.log(propertName);
+	message[kpi].forEach(function(property){
+if(Object.keys(property) == propertName){		
+ 	var ROB_AvailabilityData = google.visualization.arrayToDataTable([
+ 		['Task', 'Hours per Day'],
+ 		['Busy', property[propertName]],
+ 		['Idle', 100 - property[propertName]]
+ 	]);
+ 	var options1 = {
+ 		title: propertName,
+ 		pieSliceText: 'label',
+ 		is3D: true,
+		backgroundColor: 'transparent',
+ 		slices: {
+ 			0: {
+ 				offset: 0.2
+ 			}
+ 		},
+ 	};
+ 	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
+ 	chart1.draw(ROB_AvailabilityData, options1);
+}
+	}); 
+	/* var rob_number = "ROB" + j + "_" + kpi;
  	var ROB_AvailabilityData = google.visualization.arrayToDataTable([
  		['Task', 'Hours per Day'],
  		['Busy', message[kpi][j - 1][rob_number]],
@@ -286,7 +373,7 @@ $scope.dataInfo = function(message,kpi, j){
  		},
  	};
  	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
- 	chart1.draw(ROB_AvailabilityData, options1);
+ 	chart1.draw(ROB_AvailabilityData, options1); */
 
 
  };
@@ -296,7 +383,7 @@ var init= function()
 	$http.get("http://localhost:3000/kpi/viewData")
 				.then(function(response) {
 					$scope.checkedequipmentList = response.data;
-		console.log(response.data);
+		
 		
 				});
 }

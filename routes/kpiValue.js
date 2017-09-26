@@ -11,6 +11,7 @@ var eventEmitt = new events.EventEmitter();
 var http = require('http');
 var request = require('request');
 var path = require('path');
+var xml = require('xml');
 //var xml2js = require('xml2js');
 //var parser = new xml2js.Parser();
 var querystring = require('querystring');
@@ -57,7 +58,8 @@ fileslist.push(path.basename(entry, '.xml')); // hello
 router.get('/readXmlFile/:file_name', function(req, res, next) {
 	var filename = req.params.file_name + '.xml';
 	fs.readFile('public/xmlfile/'+filename, 'utf8', function(err, data) {
-		res.send({data:data});
+		res.set('Content-Type', 'application/xml');
+		res.send(data);
 	});
 	
 });

@@ -27,11 +27,13 @@
 
 .HolyGrail-nav{
   /* 12em is the width of the columns */
-  flex: 0 0 25em;
+ 
+  flex: 0 0 5em; 
 }
 .HolyGrail-ads {
   /* 12em is the width of the columns */
-  flex: 0 0 40em;
+  flex: 1;
+ padding-left:2px;
 }
 .HolyGrail-nav {
   /* put the nav on the left */
@@ -153,7 +155,7 @@ a:hover{
     height: 100%;
     margin-left: -204px;
     overflow-y: auto;
-	margin-top:-25px;
+	margin-top:-30px;
     background: #fffff;
     -webkit-transition: all .5s ease;
     -moz-transition: all .5s ease;
