@@ -9,8 +9,6 @@ var request = require('request');
 //var parser = new xml2js.Parser();
 var querystring = require('querystring');
 var qs = require('qs');
-  var XMLWriter = require('xml-writer');
-    xw = new XMLWriter;
 var Client = require('node-rest-client').Client;
 var client = new Client();
 var http = require("http");
@@ -29,10 +27,6 @@ var Scrap_Quantity=0;
 var Produced_Quantity=0;
 var Previously_Unloaded=0;
 var UpdateFrontEnd = require('./UpdateFrontEnd');
-var credentials;
-var variables;
-var totalResult;
-var formulas;
 var KPIs = {
     Availability: [{
         ROB1_Availability: 0
@@ -165,7 +159,7 @@ function getFormulaList() {
 					var index_new = finalArray.map(function(d) { return d['kpi']['value']; }).indexOf(kpiinitial.kpi.value);
 					if (index_new < 0)
 							finalArray.push(kpiinitial);
-						//KPIsNew[kpiinitial.kpi.value]=[];
+						KPIsNew[kpiinitial.kpi.value]=[];
 					count++;
 					delete kpiinitial.variable;
 					});
@@ -241,160 +235,221 @@ reject('Error');
 });
 }  
 
- 
 
-/*********************************************************************************************************************/
-/*------------------------------------New self formula execution Function--------------------------------------------*/
-function calculate(para1, formula){
+ function evaluateformula(NewVariable,KpiList){
+	  console.log('***********I am NewVariable in evaluateformula********************')
+	 console.log(NewVariable);
+	 KpiList = JSON.parse(KpiList);
+	 var countr=0;
+	 formulaRepeat++
+	 KpiList.forEach(function(kpilistelement){
+	if (kpilistelement.kpi.value=='Availability')
+	{
+if(formulaRepeat>1){
+	var i=0;
+	NewVariable.Actual_Production_Time.forEach(function(equipment){
 		
-    	var paraArray = formula.split(" ");
-      //console.log(paraArray);
-      argu = [];
-      paraArray.forEach(function(x){
-      if(x.length > 1 && isNaN(x))
-      	argu.push(x);
-      });
-     
-     // console.log(argu);
-      formula = "return ".concat(formula);
-      //console.log(formula);
-      var myFunc = new Function(argu, formula);
-      //console.log(myFunc(9,3))
-      
-      var data1 = para1[argu[0]];
-      var data2 = para1[argu[1]];
-
-
-
-     if (data2.length>0 && data1.length>0){
-      var len = data1.length > 1 ? data1.length : data2.length;
-      //console.log(len);
-	 
-   		var finalResult = [];
-      for(var i = 0; i < len; i++){
-      var a = data1.length > 1 ? data1[i][Object.keys(data1[i])[0]] : data1[0][Object.keys(data1[0])[0]]
-      var b = data2.length > 1 ? data2[i][Object.keys(data2[i])[0]] : data2[0][Object.keys(data2[0])[0]]
-      //console.log(Object.keys(data1[i])[0] + " : "+myFunc(a,b))
-     // var x = Object.keys(data1[i])[0] + " : "+myFunc(a,b);
-     // var y = Object.keys(data1[i])[1] +" : "+data1[i][Object.keys(data1[i])[1]]
-      var me = {};
-      me[Object.keys(data1[i])[0]] = myFunc(a,b);
-	  var time;
-	 if (data1.length ===1 && data2.length===1){
-		 time= data2[0][Object.keys(data2[0])[1]]
-	 }
-	 else if(data2.length>1){
-		 time= data2[i][Object.keys(data2[i])[1]];
-	 }
-	 else if(data1.length >1 && data2.length===1){
-		 time =data1[i][Object.keys(data1[i])[1]];
-	 }
-	  //var time = data2.length>1 ? data2[i][Object.keys(data2[i])[1]] : data1[i][Object.keys(data1[i])[1]];
-      me[Object.keys(data2[0])[1]] = time;
-      
-      finalResult.push(me);
-      }
-      
-      return finalResult;
-	 }
-      //console.log(finalResult)
-         
-}
-
-//start();
-/* var tempData = {
-	qualityRatio : [],
-	availability : {}
-}; */
-var tempData = {};
-function testFormula(allFormula, userData){
-	console.log('***********I am formulas in testFormula********************')
-	 console.log(allFormula);
- console.log('***********I am userdata in testFormula********************')
-	 console.log(userData);
-
-  for (var key in userData) {
-    userData[key].sort(function (a, b) {
-      return Object.keys(a)[0].replace(/\D/g,'') - Object.keys(b)[0].replace(/\D/g,''); 
-    })}
-    totalResult = {};
-	var timeQuality = -1;
-			for (var key in allFormula) {
-      	//console.log(allFormula[key]);
-        var formula = allFormula[key];
-        //formula = "return ".concat(formula);
-        //console.log(formula);
-        gotResult = calculate(userData, formula) 
-        totalResult[key] = gotResult;
-		
-		}
-		//console.log(totalResult,'***********I am 0000000 tempdata newwwwwwwwwwwwwwwwwwww********************');
-	 	for (var keys in totalResult) { 
-		if(!tempData[keys])
-		{
-		tempData[keys]={}
-		}
-		totalResult[keys].forEach(function(avaldata) {	
-		 var keyObj = Object.keys(avaldata)[0];
-		if(!tempData[keys][keyObj]){
-					
-					tempData[keys][keyObj] = []; 		
-		}
-		
-		var length = tempData[keys][keyObj].length-1;
-		if (tempData[keys][keyObj].length==0 || tempData[keys][keyObj][length][0]!=avaldata.hasTime){
+	var key = Object.keys(equipment);
+	var key1 = Object.keys(NewVariable.Total_PT[0]);
 	
-		tempData[keys][keyObj].push([avaldata.hasTime, avaldata[keyObj] , 100-avaldata[keyObj]] );
-		}
-		if (tempData[keys][keyObj].length==5){
-					tempData[keys][keyObj].shift();
-				}
-		
-		}); 
-		/* }
-				if(!tempData.availability[keyObj]){
-					tempData.availability[keyObj] = [];
-				}
-				tempData.availability[keyObj].push([avaldata.hasTime, avaldata[keyObj] , 100-avaldata[keyObj]] ); */
-		}
-		 
-	/* 	if(totalResult['Availability']){
-			
-			totalResult['Availability'].forEach(function(avaldata) {
-				
-				var keyObj = Object.keys(avaldata)[0];
-				if(!tempData.availability[keyObj]){
-					tempData.availability[keyObj] = [];
-				}
-				tempData.availability[keyObj].push([avaldata.hasTime, avaldata[keyObj] , 100-avaldata[keyObj]] );
-				//console.log(tempData.availability);
+	var TTR= parseFloat(((equipment[key[0]]/NewVariable.Total_PT[0][key1[0]]) * 100).toFixed(2));
+			KPIsNew['Availability'][i][key[0]]= TTR;
+			KPIsNew['Availability'][i][key[1]]= equipment[key[1]];
+			i++;
 			});
-			
-		} 
-      
-		if(totalResult['Quality-Ratio'] && totalResult['Quality-Ratio'][0] ){
-			if(totalResult['Quality-Ratio'][0].hasTime!=timeQuality){
-				timeQuality= totalResult['Quality-Ratio'][0].hasTime;
-				tempData.qualityRatio.push([totalResult['Quality-Ratio'][0].hasTime,totalResult['Quality-Ratio'][0].hasValue, 100 - totalResult['Quality-Ratio'][0].hasValue]);
-				/*console.log('***********I am tempdata newwwwwwwwwwwwwwwww********************');
-				console.log(tempData);
-				
-				if (tempData.qualityRatio.length==5){
-					tempData.qualityRatio.shift();
-				}	
-			}
-		} */ 
-	
-	  console.log('***********I am tempdata in testFormula********************');
-	   console.log(tempData);
-	   console.log('***********I am total result in testFormula********************');
-      console.log(totalResult);
-	  io.emit('test', tempData);
-	    console.log('*******************************');
+	  console.log('*******************It is KPIs New in evaluateformula in next attempt****************');
+	console.log(KPIsNew);
 }
+		else{
+	NewVariable.Actual_Production_Time.forEach(function(equipment){
 
-/*-----------------------------------------------Formula function End---------------------------------------------------------------*/
-/************************************************************************************************************************************/
+		countr++;
+	var key = Object.keys(equipment);
+	var key1 = Object.keys(NewVariable.Total_PT[0]);
+	
+	var TTR= parseFloat(((equipment[key[0]]/NewVariable.Total_PT[0][key1[0]]) * 100).toFixed(2));
+	var newobject1 = {};
+			newobject1[key[0]] = TTR;
+			newobject1[key[1]]= equipment[key[1]];
+	KPIsNew['Availability'].push(newobject1);
+	
+	 });
+		}
+	
+	}
+	if (kpilistelement.kpi.value=='Allocation-Efficiency')
+	{
+if(formulaRepeat>1){
+	var i=0;
+	NewVariable.Actual_Unit_Busy_Time.forEach(function(equipment){
+		
+	var key = Object.keys(equipment);
+	var key1 = Object.keys(NewVariable.Total_PT[0]);
+	
+	var TTR= parseFloat(((equipment[key[0]]/NewVariable.Total_PT[0][key1[0]]) * 100).toFixed(2));
+			KPIsNew['Allocation-Efficiency'][i][key[0]]= TTR;
+			KPIsNew['Allocation-Efficiency'][i][key[1]]= equipment[key[1]];
+			i++;
+			});
+	  console.log('*******************It is KPIs New in evaluateformula in next attempt****************');
+	console.log(KPIsNew);
+}
+		else{
+	NewVariable.Actual_Unit_Busy_Time.forEach(function(equipment){
+
+		countr++;
+	var key = Object.keys(equipment);
+	var key1 = Object.keys(NewVariable.Total_PT[0]);
+	
+	var TTR= parseFloat(((equipment[key[0]]/NewVariable.Total_PT[0][key1[0]]) * 100).toFixed(2));
+	var newobject1 = {};
+			newobject1[key[0]] = TTR;
+			newobject1[key[1]]= equipment[key[1]];
+			
+	KPIsNew['Allocation-Efficiency'].push(newobject1);
+	
+	 });
+		}
+	
+	}
+	if (kpilistelement.kpi.value=='Utilization-Efficiency')
+	{
+if(formulaRepeat>1){
+	var i=0;
+	NewVariable.Actual_Production_Time.forEach(function(equipment){
+		
+	var key = Object.keys(equipment);
+	NewVariable.Actual_Unit_Busy_Time.forEach(function(equipment1){
+	var key1 = Object.keys(equipment1);
+	if(key[0]===key1[0])
+	{
+	var TTR= parseFloat(((equipment[key[0]]/equipment1[key1[0]]) * 100).toFixed(2));
+			KPIsNew['Utilization-Efficiency'][i][key[0]]= TTR;
+			KPIsNew['Utilization-Efficiency'][i][key[1]]= equipment[key[1]];
+			i++;
+	}
+			});
+			});
+	  console.log('*******************It is KPIs New in evaluateformula in next attempt****************');
+	console.log(KPIsNew);
+}
+		else{
+
+
+		countr++;
+		NewVariable.Actual_Production_Time.forEach(function(equipment){
+		
+	var key = Object.keys(equipment);
+	NewVariable.Actual_Unit_Busy_Time.forEach(function(equipment1){
+	var key1 = Object.keys(equipment1);
+	if(key[0]===key1[0])
+	{
+	var TTR= parseFloat(((equipment[key[0]]/equipment1[key1[0]]) * 100).toFixed(2));
+			var newobject1 = {};
+			newobject1[key[0]] = TTR;
+			newobject1[key[1]]= equipment[key[1]];
+	KPIsNew['Utilization-Efficiency'].push(newobject1);
+	console.log('*******************It is KPIs New in evaluateformula in next attempt****************');
+	console.log(KPIsNew);
+			
+	}
+			});
+			});
+	
+		}
+	
+	}
+		if (kpilistelement.kpi.value=='Quality-Ratio')		
+		{
+			if(formulaRepeat>1){
+			/* 	NewVariable.Actual_Production_Time.forEach(function(equipment){
+				for (var varkey in equipment){
+					 if (equipment.hasOwnProperty(varkey)){
+						 var totalQuality=  */
+						 var totalQuality = (NewVariable.Good_Quantity[0].hasValue/NewVariable.Produced_Quantity[0].hasValue)*100;
+						 KPIsNew['Quality-Ratio'][0].hasValue=totalQuality;
+						 KPIsNew['Quality-Ratio'][0].hasTime=NewVariable.Produced_Quantity[0].hasTime;
+					 }
+					 else{
+						 var totalQuality = (NewVariable.Good_Quantity[0].hasValue/NewVariable.Produced_Quantity[0].hasValue)*100;
+var newobject2={'hasValue': totalQuality, 'hasTime':NewVariable.Produced_Quantity[0].hasTime }						
+						KPIsNew['Quality-Ratio'].push(newobject2);
+					 }
+					 		
+			
+				}
+if (kpilistelement.kpi.value=='Scrap-Ratio')		
+		{
+			if(formulaRepeat>1){
+			/* 	NewVariable.Actual_Production_Time.forEach(function(equipment){
+				for (var varkey in equipment){
+					 if (equipment.hasOwnProperty(varkey)){
+						 var totalQuality=  */
+						 var totalScrap = (NewVariable.Scrap_Quantity[0].hasValue/NewVariable.Produced_Quantity[0].hasValue)*100;
+						 KPIsNew['Scrap-Ratio'][0].hasValue=totalScrap;
+						 KPIsNew['Scrap-Ratio'][0].hasTime=NewVariable.Produced_Quantity[0].hasTime;
+					 }
+					 else{
+						 var totalScrap = (NewVariable.Scrap_Quantity[0].hasValue/NewVariable.Produced_Quantity[0].hasValue)*100;
+var newobject2={'hasValue': totalScrap, 'hasTime':NewVariable.Produced_Quantity[0].hasTime}						
+						KPIsNew['Scrap-Ratio'].push(newobject2);
+					 }
+					 		  if (countr==NewVariable.Actual_Production_Time.length){
+		  console.log('*******************It is KPIs New in evaluateformula****************');
+	console.log(KPIsNew);
+	
+	 }
+			
+				}
+			
+			 
+	 });
+	 setTimeout(function() {
+	io.emit('test', KPIsNew);
+	}, 5000); 
+};
+	
+/*****************************New Function Method**********************/
+/* function forumlaexecute(NewVariable, FormulaList){
+	
+    console.log('***********I am NewVariable in formula execute********************');
+	console.log(NewVariable);
+	console.log('*******************************');
+	console.log('***********I am formulalist in formula execute********************');
+	console.log(FormulaList);
+	console.log('*******************************');
+for (var formula in FormulaList) {
+
+var separators = [' ', '\\\+', '-', '\\\(', '\\\)', '\\*', '/', ':', '\\\?'];
+var formulaelements = FormulaList[formula].split(new RegExp(separators.join('|'), 'g'));
+NewVariable[formulaelements[0]].forEach(function(equipment){
+	var key = Object.keys(equipment);
+	var y=equipment[key[0]];
+	console.log(key);
+	console.log(NewVariable[formulaelements[1]]);
+	var key1 = Object.keys(NewVariable[formulaelements[1]][0]);
+	console.log(key1);
+	var x=NewVariable[formulaelements[1]][0][key1[0]];
+	console.log(y);
+	console.log(x);
+	var result = new Function(y,x,'return '+FormulaList[formula] );
+	console.log('***********I am result in ********************')
+	console.log(result);
+});
+
+
+  
+}
+	
+} */
+
+
+
+
+
+
+	
+
 
 
 
@@ -444,9 +499,7 @@ var propkey=Object.keys(equipment);
 		
 		});
 		
-		setTimeout(function(){  
-		testFormula(formulas, NewVariable );
-		}, 5000);
+		setTimeout(function(){  evaluateformula(NewVariable,KpiList); }, 5000);
 		
 	}
 	
@@ -493,12 +546,11 @@ propertyupdate = "hasValue_ROB" + i;
 				{
 					property[propertyupdate]= Total_time_ROB;
 					property[propkey[1]]=parseit.results.bindings[Blength-1].time.value;
-	
-					testFormula(formulas, NewVariable);
-					
+					evaluateformula(NewVariable,KpiList);
 				}
 			});
  			KPIs["Availability"][i-1][rob_number] = TTR;
+			//io.emit('test', KPIs);
                   
  		}
  		else {
@@ -598,7 +650,7 @@ reject('Error');
 	
 function updateinitialsetpoint() {
 	return new Promise(function(resolve, reject){ 
-	var updateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> insert {[] test:Kpi_Variable ?s; test:hasValue ?p; test:hasTime ?now.} where {values (?s ?p ) {(test:Planned_Busy_Time  3600)} bind (now() as ?now)}";
+	var updateQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> insert {[] test:Kpi_Variable ?s; test:hasValue ?p; test:hasTime ?now.} where {values (?s ?p ) {(test:Total_PT  3600)} bind (now() as ?now)}";
 
 	var myquery2 = qs.stringify({
 		update: updateQuery
@@ -708,63 +760,12 @@ function deleteData(deleteEquipmentList){
 
 
 
-function createnewKPI(newkpidata,formvariables){
-	var updateQuery = 'PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#>PREFIX owl:<http://www.w3.org/2002/07/owl#> PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> INSERT DATA {test:'+newkpidata.Name+ ' rdf:type test:KPIs, owl:NamedIndividual. test:'+newkpidata.Name+ ' test:hasDescription "' +newkpidata.Description+'". test:'+newkpidata.Name+ ' test:hasFormula "'+newkpidata.Formula+'" . test:'+newkpidata.Name+ ' test:hasID "'  +newkpidata.ID+'" . test:'+newkpidata.Name+  ' test:hasName "'  +newkpidata.Name+'". test:'+newkpidata.Name+ ' test:hasRangeID "'  +newkpidata.Range.ID+'". test:'+newkpidata.Name+ ' test:hasRangeDescription "'  +newkpidata.Range.Description+'" .test:'+newkpidata.Name+ ' test:hasRangeLowerLimit "'  +newkpidata.Range.LowerLimit+'" .test:'+newkpidata.Name+ ' test:hasRangeUpperLimit "'  +newkpidata.Range.UpperLimit+'" . test:'+newkpidata.Name+  ' test:hasScope "' +newkpidata.Scope+'" . test:'+newkpidata.Name+	' test:hasTrend "'   +newkpidata.Trend+'" . test:'+newkpidata.Name+' test:hasUnitOfMeasure "' +newkpidata.UnitOfMeasure+'" . test:'+newkpidata.Name+   ' test:hasNotes "' +newkpidata.Notes+'". ';
-newkpidata.Timing.forEach(function(eachtime){
-	updateQuery= updateQuery + 'test:'+newkpidata.Name+' test:hasTiming "'+eachtime+'". ';
-});
-newkpidata.Audience.forEach(function(eachaudience){
-	updateQuery= updateQuery + 'test:'+newkpidata.Name+' test:hasAudience "'+eachaudience+'". ';
-});
-newkpidata.ProductionMethodology.forEach(function(eachpm){
-	updateQuery= updateQuery + 'test:'+newkpidata.Name+' test:hasProductionMethodology "'+eachpm+'". ';
-});
-formvariables.forEach(function(eachvariable){
-updateQuery= updateQuery + 'test:'+newkpidata.Name+' test:hasVariable test:'+eachvariable.firstvariable+', test:'+eachvariable.secondvariable+' . }';
-});
-console.log(updateQuery);
-	 var myquery2 = qs.stringify({
-		update: updateQuery
-	});
-	
-
-	request.post({
-		headers: {
-			'content-type': 'application/x-www-form-urlencoded'
-		},
-		url: 'http://localhost:3030/DS-1/?' + myquery2
-	}, function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			console.log('successful update');
-			getFormulaList().then(function(formula) {
-		formulas = formula;
-			console.log('*******************It is New formulasList****************');
-			console.log(formulas);
-			console.log('*******************It is New formulasList****************');
-			testFormula(formulas, NewVariable );
-	}).catch(function(err) {
-		console.log(err);
-	});	
-		} else {
-			//console.log(response.statusCode)
-			console.warn(error);
-		}
-	}); 
-	
-}
-
-
-
-
-
-
-
 /**************************************** Recieves Post Notification from Simulator whenever something changes on the simulator*****************************************/
 router.post('/data', function(req, res) {
 	res.end(); 
 	
 	var notif = req.body;
-//console.log(req.body);
+console.log(req.body);
 	/********************************* When Conveyor Start Transferring *****************************************/
 		if (notif.Msg == 'ConveyorStartTransferring') {
 
@@ -1013,13 +1014,13 @@ if (notif.MSG == 'PaperUnloaded'){
 		Produced_Quantity=1;
 		Quality = Math.floor((Math.random() * 30) + 70);
 		console.log('Qualitis ********** ', Quality);
-		if (Quality >=80)
+		if (Quality >=75)
 		{
 			
 			Good_Quantity=1;
 			UpdateQuality('Good_Quantity', Good_Quantity, Produced_Quantity);
 		}
-		else if (Quality<80)
+		else if (Quality<75)
 		{
 			
 			Scrap_Quantity=1;
@@ -1227,62 +1228,6 @@ router.post('/deleteData', function(req, res) {
 		
 });
 
-
-
-router.post('/xmlForm', function(req, res) {
-	credentials=req.body.credentials;
- variables=req.body.variables;
- console.log(credentials);
- createnewKPI(credentials, variables);
-       		xw.startDocument('1.0', 'UTF-8');
-			 xw.startElement('KPIDefinition');
-    xw.writeAttribute("xsi:schemaLocation", "http://www.mesa.org/xml/KPI-ML-V01 KPI-ML-V01.xsd");
-	xw.writeAttribute("xmlns", "http://www.mesa.org/xml/KPI-ML-V01");
-	xw.writeAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance");
-	Object.keys(credentials).forEach(function(key) {
-  
- //for (var key in credentials) {
-	 
-	 if (typeof(credentials[key])== 'object' && !Array.isArray(credentials[key])){
-		 xw.startElement(key);
-		 for (var key1 in credentials[key]) {
-			 
-			 xw.startElement(key1).text(credentials[key][key1]).endElement(key1);
-			 
-		 }
-		 xw.endElement(key);
-		 
-		 
-		 /* credentials[key].forEach(function(item){
-			 console.log('usman');
-			  xw.startElement(key).text(item).endElement(key);
-		 }) */
-		 
-	 }
-	 else if(typeof(credentials[key])== 'object' && Array.isArray(credentials[key])) {
-		 credentials[key].forEach(function(item){
-			
-			  xw.startElement(key).text(item).endElement(key);
-			   });
-	 }
-	 else{
-      		xw.startElement(key).text(credentials[key]).endElement(key);
-       
- } 
- 
- 
-});
-xw.endElement('KPIDefinition');
-	
- 
-  res.set('Content-Type', 'application/xml');
-  res.send(xw.output);
-		
-});
-
-
-
-
 router.get('/viewData',function(req, res) {
 	//console.log('Initial data');
 	var viewQuery = "PREFIX test:<http://www.semanticweb.org/muhammad/ontologies/2017/2/untitled-ontology-14#> SELECT  ?KPIs ?equipments where {?KPIs test:isViewed ?equipments}";
@@ -1318,7 +1263,7 @@ router.get('/viewData',function(req, res) {
 				
  console.log(view_arr);
  			} */
-			io.emit('test', tempData);
+			io.emit('test', KPIsNew);
 			res.send(checkedequipmentList)
 
  		}
@@ -1335,19 +1280,6 @@ router.post('/deleteView',function(req, res) {
 	console.log(req.body);
 	UpdateFrontEnd.deleteView(req.body.deleteXML, req.body.deleteEquipment);
 	res.send("I will delete it");
-	
-		
-});
-router.get('/getXmlList',function(req, res) {
-getFormulaList().then(function(formula) {
-		formulas = formula;
-			console.log('*******************It is New formulasList****************');
-			console.log(formulas);
-			res.send(Object.keys(formulas));
-			
-	}).catch(function(err) {
-		console.log(err);
-	});	
 	
 		
 });
@@ -1373,7 +1305,7 @@ eventEmitt.on('Intialization', function() {
 	app.set('port', Configuration.SocketPort3);
 	var server = http.createServer(app);
 	server.listen(Configuration.SocketPort3);
-		
+		var formulas;
 	getFormulaList().then(function(formula) {
 		formulas = formula;
 			console.log('*******************It is formulasList****************');
@@ -1383,25 +1315,44 @@ eventEmitt.on('Intialization', function() {
 		console.log(err);
 	});	
 	updateinitialsetpoint().then(function(updated){
-		
+		console.log(updated);
 		getKpiList();
 		return getVariableList();
 	}).then(function(data){
-	
+	/* 	console.log('****************New Str****************');
+		console.log(data);
+		console.log('****************New Str****************') */
 		return getNewdata(data);
 	}).then(function(variablesData){
-		
-		
-		testFormula(formulas, variablesData );
-		 
+		console.log('***********I am going in formula execute********************');
+		//forumlaexecute(variablesData,formulas);
+		 evaluateformula(variablesData,KpiList);
 	}).catch(function(err){ 
 	consol.log('here is the problem');
 	console.log(err)});
 
+	//getFormulaList();
+	
+	
+			
 
+	// getKpiList(); 
+	//getVariableList();
 	io = require('socket.io')(server);
 	
- 
+//getInitialData(1);
+
+	/* setInterval(function() {
+		getData(1);
+
+	}, 250);
+*/
+		//console.log(newvar1);
+	
+  
+	 /*  setTimeout(function() {
+		io.emit('test', KPIsNew);
+	}, 10000); */  
  
   	
 });

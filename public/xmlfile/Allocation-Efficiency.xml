@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<KPIDefinition 
+xsi:schemaLocation="http://www.mesa.org/xml/KPI-ML-V01 KPI-ML-V01.xsd" 
+xmlns="http://www.mesa.org/xml/KPI-ML-V01" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> 
+ <ID>AE100</ID> 
+ <Description>  The allocation efficiency is the ratio bet ween the actual allocation time of a work unit expressed as the actual unit busy time (AUBT) and the planned time for allocating the work unit expressed as the planned unit busy time (PBT). 
+ </Description> 
+ <Name>Allocation Efficiency</Name> 
+ <Scope>  Product, production order, and work unit </Scope>  
+ <Formula>Allocation Efficiency =Actual Unit Busy Time/Planned Busy Time</Formula> 
+ <UnitOfMeasure>%</UnitOfMeasure> 
+ <Range> 
+ <ID>Natural</ID> 
+ <Description>Natural Range</Description> 
+ <LowerLimit>0</LowerLimit> 
+ <UpperLimit>100</UpperLimit> 
+ </Range> 
+ <Trend>Higher-is-better</Trend> 
+ <Timing>On-demand</Timing> 
+ <Audience>Operator</Audience> 
+ <Audience>Supervisor</Audience> 
+ <Audience>Management</Audience> 
+  <ProductionMethodology>Discrete</ProductionMethodology> 
+ <ProductionMethodology>Batch</ProductionMethodology> 
+ <ProductionMethodology>Continuous</ProductionMethodology> 
+ <Notes>” The allocation efficiency indicates how strongly the planned capacit y of the work unit is already used and how much planned capacit y is still available
+The allocation efficiency is only affected by the actual unit idle time while the availability KPI takes the actual unit delay time into account.” 
+ </Notes> 
+</KPIDefinition> 

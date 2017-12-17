@@ -36,9 +36,8 @@ eventEmitt.on('Intialization', function() {
 });
 
 var equipmentlist = ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
-
-
-var listkpi = ["Availability", "Setup rate", "Effective", "usman"];
+var allequipmentlist = ["Production Line","Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
+var production_line = ["Production Line"];
 
 router.get('/list', function(req, res, next) {
 
@@ -72,9 +71,17 @@ router.get('/sample', function(req, res, next) {
 
 });
 router.get('/assign-Equipment/:kpiname', function(req, res, next) {
-
+if (req.params.kpiname== 'Quality-Ratio' || req.params.kpiname== 'Scrap-Ratio')
+{
+	res.send(production_line);
+}
+else if(req.params.kpiname== 'Allocation-Efficiency' || req.params.kpiname== 'Utilization-Efficiency' || req.params.kpiname== 'Availability')
+{
 	res.send(equipmentlist);
-
+}
+else{
+	res.send(allequipmentlist);
+}
 	//res.send(data);
 });
 

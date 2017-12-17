@@ -4,9 +4,9 @@ var Client = require('node-rest-client').Client;
 var client = new Client();
 var JSON_Data; 
 var fs = require('fs');
-var validate = require('url-validator');
 var RTU_Obj;
 var Configuration={};
+var validate = require('url-validator');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 router.use(function(req, res, next) {
@@ -462,8 +462,13 @@ io.on('connection',IO_Socket);
 	})
 	
 	socket.on('Event',function(msg){
+		
+		
+							
+		//console.log(msg);
 		REST_POST('http://localhost:3000/kpi/data',msg);
 		
+		//Now go to your KPI extension and interact with me.
 		var dd = new Date();
 		var d = dd.getTime();
 		if(msg.Msg=='ConveyorStartTransferring')
@@ -488,9 +493,9 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].started.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].ConveyorStartTransferring == false)
 				{
-					Services_ID_List[msg.ServiceID].started.event = true
+					Services_ID_List[msg.ServiceID].ConveyorStartTransferring = true	
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('z'+msg.From)!=-1)
@@ -498,10 +503,10 @@ io.on('connection',IO_Socket);
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
 							Args.id = "Z"+msg.From+"_Changed";
-							Args.senderId = "SIM_CNV"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {palletId : "-1"}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.senderID = "SimCNV"+msg.WS;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : -1}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args);
@@ -521,10 +526,10 @@ io.on('connection',IO_Socket);
 									var destURL = EventList[keys[i]].destUrl;	
 									var Args = {};
 									Args.id = "Z5_Changed";
-									Args.senderId = "SIM_CNV12";
-									//Args.lastEmit = d;
-									Args.payload = {palletId : "-1"}
-									//Args.clientData = EventList[keys[i]].clientData;
+									Args.senderID = "SimCNV12";
+									Args.lastEmit = d;
+									Args.payload = {PalletID : -1}
+									Args.clientData = EventList[keys[i]].clientData;
 									if(destURL!="")
 									{	
 										REST_POST(destURL,Args)
@@ -543,10 +548,10 @@ io.on('connection',IO_Socket);
 									var destURL = EventList[keys[i]].destUrl;	
 									var Args = {};
 									Args.id = "Z5_Changed";
-									Args.senderId = "SIM_CNV"+(parseInt(msg.WS)-1);
-									//Args.lastEmit = d;
-									Args.payload = {palletId : "-1"}
-									//Args.clientData = EventList[keys[i]].clientData;
+									Args.senderID = "SimCNV"+(parseInt(msg.WS)-1);
+									Args.lastEmit = d;
+									Args.payload = {PalletID : -1}
+									Args.clientData = EventList[keys[i]].clientData;
 									if(destURL!="")
 									{
 										REST_POST(destURL,Args)
@@ -554,8 +559,7 @@ io.on('connection',IO_Socket);
 								}
 							}
 						}
-					}
-					//remove the sevice from teh list
+					}	
 				}
 			}
 		} 
@@ -589,7 +593,7 @@ io.on('connection',IO_Socket);
 						Args.PalletID = RTU_Zones[11]["Z4"];
 						var d = new Date();
 						Args.ServiceID = d.getTime();
-						//io.emit('Process', Args);
+						io.emit('Process', Args);
 						CNV_Queue[11]["TZ45"]="0";
 					}
 					else if(CNV_Queue[11]["TZ35"] != "0")
@@ -601,7 +605,7 @@ io.on('connection',IO_Socket);
 						Args.PalletID = RTU_Zones[11]["Z3"];
 						var d = new Date();
 						Args.ServiceID = d.getTime();
-						//io.emit('Process', Args);
+						io.emit('Process', Args);
 						CNV_Queue[11]["TZ35"]="0";
 					}
 				}
@@ -617,7 +621,7 @@ io.on('connection',IO_Socket);
 						Args.PalletID = RTU_Zones[parseInt(msg.WS)-2]["Z4"];
 						var d = new Date();
 						Args.ServiceID = d.getTime();
-						//io.emit('Process', Args);
+						io.emit('Process', Args);
 						CNV_Queue[parseInt(msg.WS)-2]["TZ45"]="0";
 					}
 					else if(CNV_Queue[parseInt(msg.WS)-2]["TZ35"] != "0")
@@ -630,7 +634,7 @@ io.on('connection',IO_Socket);
 						Args.PalletID = RTU_Zones[parseInt(msg.WS)-2]["Z3"];
 						var d = new Date();
 						Args.ServiceID = d.getTime();
-						//io.emit('Process', Args);
+						io.emit('Process', Args);
 						CNV_Queue[parseInt(msg.WS)-2]["TZ35"]="0";
 					}
 				}
@@ -648,7 +652,7 @@ io.on('connection',IO_Socket);
 										Args.ServiceID = serviceId;
 										Services_ID_List.serviceId = {invoked:true}
 										
-				//io.emit('Process', Args);
+				io.emit('Process', Args);
 				CNV_Queue[parseInt(msg.WS)-1]["TZ12"]="0";	
 			}
 			
@@ -660,7 +664,7 @@ io.on('connection',IO_Socket);
 				Args.PalletID = RTU_Zones[parseInt(msg.WS)-1]["Z2"];
 										var d = new Date();
 										Args.ServiceID = d.getTime();
-				//io.emit('Process', Args);
+				io.emit('Process', Args);
 				CNV_Queue[parseInt(msg.WS)-1]["TZ23"]="0";
 			}
 			if(msg.From == '4' && CNV_Queue[parseInt(msg.WS)-1]["TZ14"] != "0")
@@ -671,7 +675,7 @@ io.on('connection',IO_Socket);
 				Args.PalletID = RTU_Zones[parseInt(msg.WS)-1]["Z1"];
 										var d = new Date();
 										Args.ServiceID = d.getTime();
-				//io.emit('Process', Args);
+				io.emit('Process', Args);
 				CNV_Queue[parseInt(msg.WS)-1]["TZ14"]="0";
 			}
 			
@@ -681,9 +685,9 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].ConveyorStopTransferring == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true
+					Services_ID_List[msg.ServiceID].ConveyorStopTransferring = true
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('z'+msg.To)!=-1)
@@ -691,10 +695,10 @@ io.on('connection',IO_Socket);
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
 							Args.id = "Z"+msg.To+"_Changed";
-							Args.senderId = "SIM_CNV"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.senderID = "SimCNV"+msg.WS;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : String(msg.PalletID)}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -714,10 +718,10 @@ io.on('connection',IO_Socket);
 									var destURL = EventList[keys[i]].destUrl;	
 									var Args = {};
 									Args.id = "Z1_Changed";
-									Args.senderId = "SIM_CNV1";
-									//Args.lastEmit = d;
-									Args.payload = {palletId : String(msg.PalletID)}
-									//Args.clientData = EventList[keys[i]].clientData;
+									Args.senderID = "SimCNV1";
+									Args.lastEmit = d;
+									Args.payload = {PalletID : String(msg.PalletID)}
+									Args.clientData = EventList[keys[i]].clientData;
 									if(destURL!="")
 									{	
 										REST_POST(destURL,Args)
@@ -758,10 +762,10 @@ io.on('connection',IO_Socket);
 									var destURL = EventList[keys[i]].destUrl;	
 									var Args = {};
 									Args.id = "Z1_Changed";
-									Args.senderId = "SIM_CNV"+(parseInt(msg.WS)+1);
-									//Args.lastEmit = d;
-									Args.payload = {palletId : String(msg.PalletID)}
-									//Args.clientData = EventList[keys[i]].clientData;
+									Args.senderID = "SimCNV"+(parseInt(msg.WS)+1);
+									Args.lastEmit = d;
+									Args.payload = {PalletID : String(msg.PalletID)}
+									Args.clientData = EventList[keys[i]].clientData;
 									if(destURL!="")
 									{	
 										REST_POST(destURL,Args)
@@ -777,14 +781,15 @@ io.on('connection',IO_Socket);
 		{
 			RTU_Zones[6]["Z3"] = msg.PalletID;
 			// emit notification
+
+			var EventList = CNV_EventsNotifs[6];
+			var keys = Object.keys(EventList).toString().split(",");
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].PalletLoaded == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true;
-					var EventList = CNV_EventsNotifs[6];
-					var keys = Object.keys(EventList).toString().split(",");
+					//Services_ID_List[msg.ServiceID].PalletLoaded = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('z3')!=-1)
@@ -792,29 +797,37 @@ io.on('connection',IO_Socket);
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
 							Args.id = "Z3_Changed";
-							Args.senderId = "SIM_CNV7";
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.senderID = "SimCNV7";
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
 							}
 						}
 					}
-					var EventList = ROB_EventsNotifs[6];
-					var keys = Object.keys(EventList).toString().split(",");
+				}
+			}
+			var EventList = ROB_EventsNotifs[6];
+			var keys = Object.keys(EventList).toString().split(",");
+			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
+			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
+			{
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].PalletLoaded == false)
+				{
+					Services_ID_List[msg.ServiceID].PalletLoaded = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('pl')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "PALLET_LOADED";
-							Args.senderId = "SIM_ROB7";
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "PalletLoaded";
+							Args.senderID = "SimROB7";
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -828,14 +841,14 @@ io.on('connection',IO_Socket);
 		{
 			RTU_Zones[6]["Z3"] = -1;
 			// emit notifs
+			var EventList = CNV_EventsNotifs[6];
+			var keys = Object.keys(EventList).toString().split(",");
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].ConveyorStartTransferring == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true;
-					var EventList = CNV_EventsNotifs[6];
-					var keys = Object.keys(EventList).toString().split(",");
+					//Services_ID_List[msg.ServiceID].ConveyorStartTransferring = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('z3')!=-1)
@@ -843,29 +856,37 @@ io.on('connection',IO_Socket);
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
 							Args.id = "Z3_Changed";
-							Args.senderId = "SIM_CNV7";
-							//Args.lastEmit = d;
-							Args.payload = {palletId :"-1"}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.senderID = "SimCNV7";
+							Args.lastEmit = d;
+							Args.payload = {PalletID :-1}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
 							}
 						}
 					}
-					var EventList = ROB_EventsNotifs[6];
-					var keys = Object.keys(EventList).toString().split(",");
+				}
+			}
+			var EventList = ROB_EventsNotifs[6];
+			var keys = Object.keys(EventList).toString().split(",");
+			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
+			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
+			{
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].ConveyorStartTransferring == false)
+				{
+					Services_ID_List[msg.ServiceID].ConveyorStartTransferring = true
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('pu')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "PALLET_UNLOADED";
-							Args.senderId = "SIM_ROB7";
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "PalletUnloaded";
+							Args.senderID = "SimROB7";
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -882,20 +903,23 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].PaperLoaded == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true
+					Services_ID_List[msg.ServiceID].PaperLoaded = true
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('pl')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "PAPER_LOADED";
-							Args.senderId = "SIM_ROB1";
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "PaperLoaded";
+							Args.senderID = "SimROB1";
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID}
+							Args.clientData = EventList[keys[i]].clientData;
+							console.log("msg in socket.on('Event')");
+							console.log(JSON.stringify(msg));
+							
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -913,20 +937,20 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].PaperUnloaded == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true;
+					Services_ID_List[msg.ServiceID].PaperUnloaded = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('pu')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "PAPER_UNLOADED";
-							Args.senderId = "SIM_ROB1";
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID)}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "PaperUnloaded";
+							Args.senderID = "SimROB1";
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -943,20 +967,20 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].PenChanged == false)
 				{
-					Services_ID_List[msg.ServiceID].finished.event = true;
+					Services_ID_List[msg.ServiceID].PenChanged = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('nepc')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "PEN_CHANGED";
-							Args.senderId = "SIM_ROB"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {penColor:msg.Color}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "PenChanged";
+							Args.senderID = "SimROB"+msg.WS;
+							Args.lastEmit = d;
+							Args.payload = {PenColor:msg.Color}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -974,20 +998,20 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].started.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].RobotStartExec == false)
 				{
-					Services_ID_List[msg.ServiceID].started.event = true;
+					Services_ID_List[msg.ServiceID].RobotStartExec = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('dse')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "DRAW_START_EXECUTION";
-							Args.senderId = "SIM_ROB"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID),recipe : msg.Recipe}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "DrawStartExecution";
+							Args.senderID = "SimROB"+msg.WS;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID,Recipe : msg.Recipe}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -1004,20 +1028,20 @@ io.on('connection',IO_Socket);
 			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
 			if(Servicekeys.indexOf(JSON.stringify(msg.ServiceID))!=-1)
 			{
-				if(Services_ID_List[JSON.stringify(msg.ServiceID)].finished.event == false)
+				if(Services_ID_List[JSON.stringify(msg.ServiceID)].RobotEndExec == false)
 				{	
-					Services_ID_List[msg.ServiceID].finished.event = true;
+					Services_ID_List[msg.ServiceID].RobotEndExec = true;
 					for(var i = 0; (i<keys.length);i++)
 					{
 						if(keys[i].indexOf('dee')!=-1)
 						{
 							var destURL = EventList[keys[i]].destUrl;	
 							var Args = {};
-							Args.id = "DRAW_END_EXECUTION";
-							Args.senderId = "SIM_ROB"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {palletId : String(msg.PalletID),recipe : msg.Recipe,color:PenColor[parseInt(msg.WS)-1]}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.id = "DrawEndExecution";
+							Args.senderID = "SimROB"+msg.WS;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID,Recipe : msg.Recipe,Color:PenColor[parseInt(msg.WS)-1]}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -1040,9 +1064,9 @@ io.on('connection',IO_Socket);
 							var Args = {};
 							Args.id = "OutOfInk";
 							Args.senderID = "SimROB"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {PalletID : String(msg.PalletID),Color: msg.Color}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID,Color: msg.Color}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -1064,9 +1088,9 @@ io.on('connection',IO_Socket);
 							var Args = {};
 							Args.id = "LowInkLevel";
 							Args.senderID = "SimROB"+msg.WS;
-							//Args.lastEmit = d;
-							Args.payload = {PalletID : String(msg.PalletID),Color: msg.Color}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.lastEmit = d;
+							Args.payload = {PalletID : msg.PalletID,Color: msg.Color}
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -1087,9 +1111,9 @@ io.on('connection',IO_Socket);
 							var Args = {};
 							Args.id = "PalletCountChanged";
 							Args.senderID = "SimROB"+msg.WS;
-							//Args.lastEmit = d;
+							Args.lastEmit = d;
 							Args.payload = {AvailablePallets : msg.PalletID,Color: msg.Color}
-							//Args.clientData = EventList[keys[i]].clientData;
+							Args.clientData = EventList[keys[i]].clientData;
 							if(destURL!="")
 							{	
 								REST_POST(destURL,Args)
@@ -1099,24 +1123,11 @@ io.on('connection',IO_Socket);
 		}
 		else if(msg.MSG == 'OpreationFinished')
 		{
-			//console.log(Services_ID_List)
-			var Servicekeys = Object.keys(Services_ID_List).toString().split(",");
-			if(Servicekeys.indexOf(JSON.stringify(msg.serviceId))!=-1)
-			{
-				if(Services_ID_List[JSON.stringify(msg.serviceId)].finished.callback == false)
-				{
-					Services_ID_List[JSON.stringify(msg.serviceId)].finished.callback = true;
-					var destURL = msg.destURL;
-					if(destURL!="")
-					{
-						REST_POST(destURL,Args)
-						// remove the service from the list
-					}
-					if(Services_ID_List[JSON.stringify(msg.serviceId)].finished.event == true)
-					{
-						delete Services_ID_List[msg.serviceId];
-					}
-				}
+			var destURL = msg.destURL;
+			if(destURL!="")
+			{	
+				REST_POST(destURL,Args)
+				// remove the service from the list
 			}
 		}
 	});
@@ -2187,38 +2198,22 @@ router.post('/*',function(req, res, next){
 											Args.ToZone = ToZone;
 											Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z"+FromZone];
 											var BodyKeys = Object.keys(req.body).toString().split(",");
-											if(BodyKeys.indexOf("destUrl") !=-1)
-											{
-												if(validate(req.body.destUrl))
-												{
-													Args.destURL = req.body.destUrl;
-													if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-													else{Args.clientData = ""}
-													var d = new Date();
-													var serviceId = d.getTime();
-													Args.ServiceID = serviceId;
-													Services_ID_List[serviceId] = {invoked:true, started:{event:false, callback:false}, finished:{event:false, callback:false}};
-													io.emit('Process', Args);
-													RES = 202
-												}
-												else
-												{
-													console.log("Error from : "+req.client._peername.address);
-													RES = 400;
-												}
-											}
-											else
-											{
-												console.log("Error from : "+req.client._peername.address);
-												RES = 400;
-											}
+											if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+											else{Args.destURL = ""}
+											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+											else{Args.clientData = ""}
+											var d = new Date();
+											var serviceId = d.getTime();
+											Args.ServiceID = serviceId;
+											Services_ID_List[serviceId] = {invoked:true,ConveyorStopTransferring:false,ConveyorStartTransferring:false}
+											io.emit('Process', Args);
+											RES = 202
 										}
 										else if(CNV_Queue[0]["TZ"+FromZone+ToZone] == "0")
 										{
 											// make queue 
-											//CNV_Queue[0]["TZ"+FromZone+ToZone] = req.body.destUrl;
-											//RES = 202
-											RES = 403;
+											CNV_Queue[0]["TZ"+FromZone+ToZone] = req.body.destUrl;
+											RES = 202
 										}
 										else{RES = 403}
 									}
@@ -2249,38 +2244,22 @@ router.post('/*',function(req, res, next){
 											Args.ToZone = ToZone;
 											Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z"+FromZone];
 											var BodyKeys = Object.keys(req.body).toString().split(",");
-											if(BodyKeys.indexOf("destUrl") !=-1)
-											{
-												if(validate(req.body.destUrl))
-												{
-													Args.destURL = req.body.destUrl;
-													if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-													else{Args.clientData = ""}
-													var d = new Date();
-													var serviceId = d.getTime();
-													Args.ServiceID = serviceId;
-													Services_ID_List[serviceId] = {invoked:true, started:{event:false, callback:false}, finished:{event:false, callback:false}};
-													io.emit('Process', Args);
-													RES = 202
-												}
-												else
-												{
-													console.log("Error from : "+req.client._peername.address);
-													RES = 400;
-												}
-											}
-											else
-											{
-												console.log("Error from : "+req.client._peername.address);
-												RES = 400;
-											}
+											if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+											else{Args.destURL = ""}
+											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+											else{Args.clientData = ""}
+											var d = new Date();
+											var serviceId = d.getTime();
+											Args.ServiceID = serviceId;
+											Services_ID_List[serviceId] = {invoked:true,ConveyorStopTransferring:false,ConveyorStartTransferring:false}
+											io.emit('Process', Args);
+											RES = 202
 										}
 										else if(CNV_Queue[6]["TZ"+FromZone+ToZone] == "0")
 										{
 											// make queue 
-											//CNV_Queue[6]["TZ"+FromZone+ToZone] = req.body.destUrl;
-											//RES = 202
-											RES=403
+											CNV_Queue[6]["TZ"+FromZone+ToZone] = req.body.destUrl;
+											RES = 202
 										}
 										else{RES = 403}
 									}
@@ -2313,38 +2292,22 @@ router.post('/*',function(req, res, next){
 												Args.ToZone = ToZone;
 												Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z"+FromZone];
 												var BodyKeys = Object.keys(req.body).toString().split(",");
-												if(BodyKeys.indexOf("destUrl") !=-1)
-												{
-													if(validate(req.body.destUrl))
-													{
-														Args.destURL = req.body.destUrl;
-														if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-														else{Args.clientData = ""}
-														var d = new Date();
-														var serviceId = d.getTime();
-														Args.ServiceID = serviceId;
-														Services_ID_List[serviceId] = {invoked:true, started:{event:false, callback:false}, finished:{event:false, callback:false}};
-														io.emit('Process', Args);
-														RES = 202
-													}
-													else
-													{
-														console.log("Error from : "+req.client._peername.address);
-														RES = 400;
-													}
-												}
-												else
-												{
-													console.log("Error from : "+req.client._peername.address);
-													RES = 400;
-												}
+												if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+												else{Args.destURL = ""}
+												if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+												else{Args.clientData = ""}
+												var d = new Date();
+												var serviceId = d.getTime();
+												Args.ServiceID = serviceId;
+												Services_ID_List[serviceId] = {invoked:true,ConveyorStopTransferring:false,ConveyorStartTransferring:false}
+												io.emit('Process', Args);
+												RES = 202
 											}
 											else if(CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] == "0")
 											{
 												// make queue 
-												//CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] = req.body.destUrl;
-												//RES = 202
-												RES=403;
+												CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] = req.body.destUrl;
+												RES = 202
 											}
 											else{RES = 403}
 										}
@@ -2358,38 +2321,22 @@ router.post('/*',function(req, res, next){
 												Args.ToZone = ToZone;
 												Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z"+FromZone];
 												var BodyKeys = Object.keys(req.body).toString().split(",");
-												if(BodyKeys.indexOf("destUrl") !=-1)
-												{
-													if(validate(req.body.destUrl))
-													{
-														Args.destURL = req.body.destUrl;
-														if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-														else{Args.clientData = ""}
-														var d = new Date();
-														var serviceId = d.getTime();
-														Args.ServiceID = serviceId;
-														Services_ID_List[serviceId] = {invoked:true, started:{event:false, callback:false}, finished:{event:false, callback:false}};
-														io.emit('Process', Args);
-														RES = 202
-													}
-													else
-													{
-														console.log("Error from : "+req.client._peername.address);
-														RES = 400;
-													}
-												}
-												else
-												{
-													console.log("Error from : "+req.client._peername.address);
-													RES = 400;
-												}
+												if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+												else{Args.destURL = ""}
+												if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+												else{Args.clientData = ""}
+												var d = new Date();
+												var serviceId = d.getTime();
+												Args.ServiceID = serviceId;
+												Services_ID_List[serviceId] = {invoked:true,ConveyorStopTransferring:false,ConveyorStartTransferring:false}
+												io.emit('Process', Args);
+												RES = 202
 											}
 											else if(CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] == "0")
 											{
 												// make queue 
-												//CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] = req.body.destUrl;
-												//RES = 202
-												RES=403;
+												CNV_Queue[parseInt(LINK[1].substring(6))-1]["TZ"+FromZone+ToZone] = req.body.destUrl;
+												RES = 202
 											}
 											else{RES = 403}
 										}
@@ -2467,30 +2414,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z2_Changed')
 								{
@@ -2502,30 +2434,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z3_Changed')
 								{
@@ -2537,30 +2454,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z5_Changed')
 								{
@@ -2572,30 +2474,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else{RES = 404}
 							}
@@ -2611,30 +2498,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z2_Changed')
 								{
@@ -2646,30 +2518,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z3_Changed')
 								{
@@ -2681,30 +2538,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='Z5_Changed')
 								{
@@ -2716,31 +2558,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else{RES = 404}
 							}
 							else if(LINK[1]== 'SimCNV2' || LINK[1]== 'SimCNV3' || LINK[1]== 'SimCNV4' || LINK[1]== 'SimCNV5' || LINK[1]== 'SimCNV6' || LINK[1]== 'SimCNV8' || LINK[1]== 'SimCNV9' || LINK[1]== 'SimCNV10' || LINK[1]== 'SimCNV11' || LINK[1]== 'SimCNV12')
@@ -2755,31 +2581,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else if(LINK[3]=='Z2_Changed')
 								{
 									EventsNotifsCount++;
@@ -2790,31 +2600,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else if(LINK[3]=='Z3_Changed')
 								{
 									EventsNotifsCount++;
@@ -2825,31 +2619,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else if(LINK[3]=='Z4_Changed')
 								{
 									EventsNotifsCount++;
@@ -2860,31 +2638,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else if(LINK[3]=='Z5_Changed')
 								{
 									EventsNotifsCount++;
@@ -2895,31 +2657,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
-								}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									CNV_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0}
 								else{RES = 404}
 							}
 							else{RES = 404}
@@ -2942,67 +2688,41 @@ router.post('/*',function(req, res, next){
 							{
 								if(LINK[3]=='LoadPaper')
 								{
+					console.log("req.body.PalletID" );
+					console.log(JSON.stringify(req.body.PalletID));
+
 									var Args = {WS:'1',Process:LINK[3]}; 
-									//Args.PalletID = req.body.PalletID;
-									Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z3"];
+									Args.PalletID = req.body.PalletID;
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PaperLoaded:false}
+					console.log(" Args to be sent in io.emit('Process', args)");
+					console.log(JSON.stringify(Args));
+			
+									io.emit('Process', Args);
+									RES = 202
 								}
 								else if(LINK[3]=='UnloadPaper')
 								{
 									var Args = {WS:'1',Process:LINK[3]}; 
-									//Args.PalletID = req.body.PalletID;
-									Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z3"];
+									Args.PalletID = req.body.PalletID;
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PaperUnloaded:false}
+									io.emit('Process', Args);
+									RES = 202
 								}
 								else{RES = 404}
 							}
@@ -3013,62 +2733,32 @@ router.post('/*',function(req, res, next){
 									var Args = {WS:'1',Process:LINK[3]}; 
 									Args.PalletID = req.body.PalletID;
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PalletLoaded:false}
+									io.emit('Process', Args);
+									RES = 202
 								}
 								else if(LINK[3]=='UnloadPallet')
 								{
 									var Args = {WS:'1',Process:LINK[3]}; 
 									Args.PalletID = req.body.PalletID;
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PalletUnloaded:false}
+									io.emit('Process', Args);
+									RES = 202
 								}
 								else{RES = 404}
 							}
@@ -3080,31 +2770,16 @@ router.post('/*',function(req, res, next){
 									var Args = {WS:LINK[1].substring(6),Process:LINK[3]};
 									Args.Color = 'RED';
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PenChanged:false}
+									io.emit('Process', Args);
+									RES = 202
 									
 								}
 								else if(LINK[3]=='ChangePenGREEN')
@@ -3113,31 +2788,16 @@ router.post('/*',function(req, res, next){
 									var Args = {WS:LINK[1].substring(6),Process:LINK[3]};
 									Args.Color = 'GREEN';
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PenChanged:false}
+									io.emit('Process', Args);
+									RES = 202;
 								}
 								else if(LINK[3]=='GetPenColor')
 								{
@@ -3152,39 +2812,21 @@ router.post('/*',function(req, res, next){
 									var Args = {WS:LINK[1].substring(6),Process:LINK[3]};
 									Args.Color = 'BLUE';
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:true, callback:true}, finished:{event:false, callback:false}};
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,PenChanged:false}
+									io.emit('Process', Args);
+									RES = 202;
 								}
 								else if(LINK[3]=='Draw1' ||LINK[3]=='Draw2' ||LINK[3]=='Draw3' ||LINK[3]=='Draw4' ||LINK[3]=='Draw5' ||LINK[3]=='Draw6' ||LINK[3]=='Draw7' ||LINK[3]=='Draw8' ||LINK[3]=='Draw9')
 								{
 									var Args = {WS:LINK[1].substring(6),Process:'Draw'}; 
-									//Args.PalletID = req.body.PalletID;
-									Args.PalletID = RTU_Zones[parseInt(LINK[1].substring(6))-1]["Z3"];
-									//console.log(RTU_Zones);
-									
+									Args.PalletID = req.body.PalletID;
 									switch(PenColor[LINK[1].substring(6)-1])
 									{
 										case'RED':
@@ -3204,32 +2846,16 @@ router.post('/*',function(req, res, next){
 									else if(Recipe == '7'||Recipe == '8'||Recipe == '9'){Args.OP = 3}
 									Args.Recipe = Recipe;
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											Args.destURL = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
-											else{Args.clientData = ""}
-											var d = new Date();
-											var serviceId = d.getTime();
-											Args.ServiceID = serviceId;
-											Services_ID_List[serviceId] = {invoked:true, started:{event:false, callback:false}, finished:{event:false, callback:false}};
-											//console.log(Args)
-											io.emit('Process', Args);
-											RES = 202
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){Args.destURL = req.body.destUrl;}
+									else{Args.destURL = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){Args.clientData = req.body.clientData;}
+									else{Args.clientData = ""}
+										var d = new Date();
+										var serviceId = d.getTime();
+										Args.ServiceID = serviceId;
+										Services_ID_List[serviceId] = {invoked:true,RobotStartExec:false,RobotEndExec:false}
+									io.emit('Process', Args);
+									RES = 202
 								}
 								else{RES = 404}
 							}
@@ -3257,30 +2883,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='PaperUnloaded')
 								{
@@ -3292,30 +2903,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else{RES = 404}
 							}
@@ -3331,30 +2927,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='PalletUnloaded')
 								{
@@ -3366,30 +2947,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='PalletCountChanged')
 								{
@@ -3401,30 +2967,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else{RES = 404}
 							}
@@ -3440,30 +2991,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='DrawStartExecution')
 								{
@@ -3475,30 +3011,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='DrawEndExecution')
 								{
@@ -3510,30 +3031,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='LowInkLevel')
 								{
@@ -3545,30 +3051,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else if(LINK[3]=='OutOfInk')
 								{
@@ -3580,30 +3071,15 @@ router.post('/*',function(req, res, next){
 									temp.class = "eventNotification";
 									temp.eventID = LINK[3];
 									var BodyKeys = Object.keys(req.body).toString().split(",");
-									if(BodyKeys.indexOf("destUrl") !=-1)
-									{
-										if(validate(req.body.destUrl))
-										{
-											temp.destUrl = req.body.destUrl;
-											if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
-											else{temp.clientData = ""}
-											var temp1 = {};
-											temp1[tempname] = temp;
-											ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
-											res.json(temp1)
-											RES =0
-										}
-										else
-										{
-											console.log("Error from : "+req.client._peername.address);
-											RES = 400;
-										}
-									}
-									else
-									{
-										console.log("Error from : "+req.client._peername.address);
-										RES = 400;
-									}
+									if(BodyKeys.indexOf("destUrl") !=-1){temp.destUrl = req.body.destUrl;}
+									else{temp.destUrl = ""}
+									if(BodyKeys.indexOf("clientData") !=-1){temp.clientData = req.body.clientData;}
+									else{temp.clientData = ""}
+									var temp1 = {};
+									temp1[tempname] = temp;
+									ROB_EventsNotifs[parseInt(LINK[1].substring(6)-1)][tempname] = temp;
+									res.json(temp1)
+									RES =0
 								}
 								else{RES = 404}
 							}
@@ -3670,16 +3146,6 @@ router.post('/*',function(req, res, next){
 		ErrorTemplate.message = "Services is not Implemented"
 		Res_Obj = ErrorTemplate;
 		res.status(501).send(Res_Obj);
-		res.end();
-	}
-	else if(RES == 400)
-	{
-		var ErrorTemplate = errorTemplate;
-		ErrorTemplate.code = 400;
-		ErrorTemplate.status="Bad Request"
-		ErrorTemplate.message = "check you request please !!"
-		Res_Obj = ErrorTemplate;
-		res.status(400).send(Res_Obj);
 		res.end();
 	}
 	else {res.end()}

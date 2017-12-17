@@ -906,6 +906,9 @@ io.on('connection',IO_Socket);
 			{
 				if(keys[i].indexOf('pl')!=-1)
 				{
+					console.log("--------------------------------------------------------------------");
+					console.log(JSON.stringify(msg));
+					console.log("--------------------------------------------------------------------");
 					var destURL = EventList[keys[i]].destUrl;	
 					var Args = {};
 					Args.id = "PaperLoaded";
@@ -925,6 +928,7 @@ io.on('connection',IO_Socket);
 						//console.log("___________________________")
 					}
 				}
+				
 			}
 			
 		}

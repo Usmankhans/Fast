@@ -273,3 +273,130 @@ a:hover{
              0 7px 0 #333333, 0 8px 7px rgba(0, 0, 0, 0.4),
              0 9px 10px rgba(0, 0, 0, 0.2);
 }
+.modal.modal-wide .modal-dialog {
+  width: 50%;
+}
+.modal-wide .modal-body {
+  overflow-y: auto;
+}
+#exampleModalLong{
+	font-size: 15px;
+}
+#exampleModalLong .formclass{
+	padding:5px;
+	width: 300px;
+	margin:10px;
+}
+
+
+
+
+
+
+
+
+.contact_form {font: 15px/21px "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;}
+.contact_form h2, .contact_form label {font-family:Georgia, Times, "Times New Roman", serif;}
+.form_hint, .required_notification {font-size: 11px;}
+
+.contact_form ul {
+    width:1100px;
+    list-style-type:none;
+    list-style-position:outside;
+    margin:0px;
+    padding:0px;
+}
+.contact_form li{
+    padding:14px; 
+    border-bottom:1px solid #eee;
+    position:relative;
+}
+.contact_form li:nth-child(5), .contact_form li:nth-child(13), .contact_form li:nth-child(20),.contact_form li:nth-child(24),.contact_form li:nth-child(28){
+    border-bottom:0px solid #777;
+}
+
+.contact_form h2 {
+    margin:0;
+    display: inline;
+}
+.required_notification {
+    color:#d45252; 
+    margin:5px 0 0 0; 
+    display:inline;
+    float:right;
+}
+
+.contact_form label {
+    width:200px;
+    margin-top: 3px;
+    display:inline-block;
+    float:left;
+    padding:3px;
+}
+.contact_form input, .contact_form select {
+    height:30px; 
+    width:280px; 
+    padding:5px 8px;
+}
+
+.contact_form textarea {padding:10px; width:300px;}
+.contact_form button {margin-left:156px;}
+
+.contact_form input:focus, .contact_form textarea:focus { /* add this to the already existing style */
+    padding-right:10px;
+}
+.contact_form input, .contact_form textarea, .contact_form select { /* add this to the already existing style */
+    -moz-transition: padding .25s; 
+    -webkit-transition: padding .25s; 
+    -o-transition: padding .25s;
+    transition: padding .25s;
+}
+.contact_form input, .contact_form textarea, .contact_form select {
+    padding-right:30px;
+}
+input:required, textarea:required, select:required {
+    background: #fff url(images/red_asterisk.png) no-repeat 98% center;
+}
+::-webkit-validation-bubble-message {
+    padding: 1em;
+}
+
+.contact_form input:required:valid, .contact_form textarea:required:valid { /* when a field is considered valid by the browser */
+    background: #fff url(images/valid.png) no-repeat 98% center;
+    box-shadow: 0 0 5px #5cd053;
+    border-color: #28921f;
+}
+
+.form_hint {
+    background: #428bca;
+    border-radius: 3px 3px 3px 3px;
+    color: white;
+    margin-left:8px;
+    padding: 1px 6px;
+    z-index: 999; /* hints stay above all other elements */
+    position: absolute; /* allows proper formatting if hint is two lines */
+    display: none;
+}
+
+.form_hint::before {
+    content: "\25C0"; /* left point triangle in escaped unicode */
+    color:#428bca;
+    position: absolute;
+    top:1px;
+    left:-6px;
+}
+.contact_form input:focus + .form_hint {display: inline;}
+.contact_form input:required:valid + .form_hint {background: #28921f;} /* change form hint color when valid */
+.contact_form input:required:valid + .form_hint::before {color:#28921f;} /* change form hint arrow color when valid */
+
+
+.contact_form input, .contact_form textarea , .contact_form select{ 
+    border:1px solid #aaa;
+    box-shadow: 0px 0px 3px #ccc, 0 10px 15px #eee inset;
+    border-radius:2px;
+}
+.contact_form input:focus, .contact_form textarea:focus {
+    background: #fff; 
+    border:1px solid red; 
+    box-shadow: 0 0 3px #aaa; 
+}

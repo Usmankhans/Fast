@@ -12,25 +12,17 @@ angular.module('kpi', [])
 		$scope.xmlFile1 = "";
       	$scope.xmlFileName = "";
 		$scope.xmlFileName1 = "";
-		$scope.xmlFileName = "";
 		$scope.visualize = "pie";
-		$scope.timinglist = ['On-demand','Real-Time', 'Periodic'];
-$scope.audiencelist = ['Operator','Supervisor', 'Management'];
-$scope.pmlist = ['Batch','Continuous', 'Discrete'];
-		$scope.variablelist=['Actual_Unit_Busy_Time','Actual_Production_Time', 'Produced_Quantity', 'Planned_Busy_Time', 'Good_Quantity', 'Scrap_Quantity'];
-$scope.operatorlist=['/', '*','+','-'];
-$scope.numbers=[0, 1, 25, 50,75, 100, 3600];
 		var globalData;
 		var tempoVal;
 		var tempoProperty;
 		var kpiname;
 		var datata=[];
 		var datata1=[];
-		var datata2=[];
 		var time;
 		var time1;
-		var time3;
-		var saveformFlag=false;
+		var previousKPI;
+		var previousProperty;
 			var i=2010;
 				var year;
 				var year1;
@@ -39,48 +31,15 @@ $scope.numbers=[0, 1, 25, 50,75, 100, 3600];
      keys : Object.keys
   }
   kpiSocket.on('test', function(msg) {
-console.log('first I got KPINew');
+console.log('I got KPINew');
  	globalData = msg;
  	var message = msg;
-	console.log(msg);
+	//console.log(msg);
 	google.charts.load('current', {
  		'packages': ['corechart']
  	});
-	var datetime= new Date(msg['Quality-Ratio'].hasValue[0]);
-	//console.log('I am fucking time', datetime);
-	
  	google.charts.setOnLoadCallback(function() {
- /*if (time!=msg['Quality-Ratio'][0].hasTime)
-		{  
-		 //year=i.toString();
-		//var datata=[[ i, property[propertName], 100 - property[propertName], '']];
-		time= msg['Quality-Ratio'][0].hasTime;
-		var datetime= new Date(msg['Quality-Ratio'][0].hasTime);
-		 datata.push([datetime,msg['Quality-Ratio'][0].hasValue, 100 - msg['Quality-Ratio'][0].hasValue]);
-		 if (datata.length==5){datata.shift();}	
-		 } */
-		 for (var key in msg){
 
-			 for (var key1 in msg[key]){
-				 //console.log('//////////////////////////////////////////////');
-				 //console.log(msg[key][key1]);
-				 var biggerArray = msg[key][key1];
-				 for(var count=0;count<biggerArray.length;count++){
-					 
-					 var smallerArray = biggerArray[count];
-					 smallerArray[0] = new Date(smallerArray[0]);
-				 
-			 }
-		 }
-		 }
-		 console.log(msg);
-			angular.forEach(msg.QualityRatio, function(value, key) {
-				value[0] = new Date(value[0]);
-				this.push(value);
-			}, datata);
-		 //datata = msg.abc;
-		// console.log(datata);
- 
  		//console.log(message);
  		if (tempoVal) {
 			//console.log(tempoProperty);
@@ -90,139 +49,6 @@ console.log('first I got KPINew');
 
  	});
  });
- 
-
- $scope.checkedtime = [];
-$scope.checkedaudience = [];
-$scope.checkedpm = [];
-$scope.timinglist = ['On-demand','Real-Time', 'Periodic'];
-$scope.audiencelist = ['Operator','Supervisor', 'Management'];
-$scope.pmlist = ['Batch','Continuous', 'Discrete'];
-	 
-$scope.newXml;
-
-
-var credentials = {
-   'ID' : " ",
-   'Description': " ",
-    'Name' : " ",
-	'Scope': " ",
-	'Formula': " ",
-	'UnitOfMeasure': " ",
-   'Range' : {
-	   'ID': " ", 
-   'Description': " ", 
-   'LowerLimit': " ",
-   'UpperLimit': " "},
-   'Trend': " ",
-   'Timing': " ",
-   'Audience' : " ",
-   'ProductionMethodology': " ",
-   'Notes': " "
- };
- $scope.save_form=function(){
-	  $scope.Formula1= $scope.firstvariable+' '+$scope.firstoperator+' '+$scope.secondvariable+' '+$scope.secondoperator+' '+$scope.lastnumber;
-	   var variables=[{'firstvariable': $scope.firstvariable, 'secondvariable': $scope.secondvariable}];
-	 credentials = {
-   'ID' : $scope.ID,
-   'Description' : $scope.Description,
-    'Name' : $scope.Name,
-	'Scope': $scope.Scope,
-	'Formula':$scope.Formula1,
-	'UnitOfMeasure': $scope.Unit,
-   'Range' : {'ID': $scope.RangeID, 
-   'Description': $scope.RangeDescription, 
-   'LowerLimit': $scope.LowerLimit,
-   'UpperLimit': $scope.UpperLimit},
-   'Trend': $scope.Trend1,
-   'Timing': $scope.checkedtime,
-   'Audience' : $scope.checkedaudience,
-   'ProductionMethodology': $scope.checkedpm,
-   'Notes': $scope.Notes
-   
-
-   
- };
- 
- saveformFlag=true;
- var formdata= {'credentials':credentials,'variables': variables};
- $http.post("http://localhost:3000/kpi/xmlForm",formdata )
-				.then(function(response) {
-					console.log(response);
-					$scope.newXml= response.data;
-					$scope.loadData();
-				}).catch(function(err) {
-		console.log(err);
-	});
-
-	 console.log(credentials);
-
- };
-  $scope.download_form=function(){
-	  if ($scope.newXml && saveformFlag){
-		  
-	
-	  var hiddenElement = document.createElement('a');
-
-hiddenElement.href = 'data:attachment/xml,' + encodeURI($scope.newXml);
-hiddenElement.target = 'http://localhost:3000/public';
-hiddenElement.download = credentials.Name+'.xml';
-hiddenElement.click();
-	  }
-	  else {
-var r = confirm("Please Submit the form first before downloading!");
-		  if (r == true) {
-     console.log(document.getElementById("exampleModalLong").style.display)
-} else {
-    document.getElementById("exampleModalLong").style.display="none";
-}
-	  }
-}; 
-$scope.toggleCheck11 = function (time) {
-        if ($scope.checkedtime.indexOf(time) === -1) {
-            $scope.checkedtime.push(time);
-			console.log($scope.checkedtime);
-			
-        } else {
-            $scope.checkedtime.splice($scope.checkedtime.indexOf(time), 1);
-			console.log($scope.checkedtime);
-			
-        }
-};
-$scope.toggleCheck2 = function (audience) {
-        if ($scope.checkedaudience.indexOf(audience) === -1) {
-            $scope.checkedaudience.push(audience);
-			console.log($scope.checkedaudience);
-			
-        } else {
-            $scope.checkedaudience.splice($scope.checkedaudience.indexOf(audience), 1);
-			console.log($scope.checkedaudience);
-			
-        }
-};
-$scope.toggleCheck3 = function (pm) {
-        if ($scope.checkedpm.indexOf(pm) === -1) {
-            $scope.checkedpm.push(pm);
-			console.log($scope.checkedpm);
-			
-        } else {
-            $scope.checkedpm.splice($scope.checkedpm.indexOf(pm), 1);
-			console.log($scope.checkedpm);
-			
-        }
-};
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 		//$scope.equipmentlist = ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 8", "Robot 9", "Robot 10", "Robot 11", "Robot 12"];
 		//$scope.robotMapp =["abc.xml  :  ROBOT-2", "abc.xml  :  ROBOT-3"];
     
@@ -261,14 +87,10 @@ $scope.toggleCheck3 = function (pm) {
 		// }];
 
 $scope.loadData = function() {
-          $http.get("http://localhost:3000/kpi/getXmlList")
+          $http.get(url + "getXmlList")
 				.then(function(response) {
-					$scope.xmlList = response.data;
-					console.log('I got new list');
-					console.log(response.data);
-				}).catch(function(err) {
-		console.log(err);
-	});	
+					$scope.xmlList = response.data.data;
+				});
 };
 
 $scope.getEquipmentlist = function(xmlFileName) {
@@ -415,8 +237,6 @@ $scope.deleteElement = function(indexNumber,equipmentname, kpiName) {
 
 $scope.openXml = function(xmlFile) {
         document.getElementById("myModal").style.display="block";
-		document.getElementById("xml-content").style.display="none";
-		 document.getElementById("robots-boxes").style.display="none";
         document.getElementById("xml-content").textContent=$scope.xmlFile;
 		$scope.xmlFile = xmlFile;
         $scope.xmlFileName = xmlFile;
@@ -429,7 +249,6 @@ $scope.openXml = function(xmlFile) {
 $scope.openXml1 = function(xmlFile) {
 	$scope.xmlFileName1=xmlFile;
 		$http.get(url + "readXmlFile/" + xmlFile).then(function(response) {
-			if(response.data){
 			if (document.implementation && document.implementation.createDocument) {
                    $scope.xmlFile1  = new DOMParser().parseFromString(response.data, 'text/xml');
 				   //console.log($scope.xmlFile1 );
@@ -452,23 +271,15 @@ $scope.openXml1 = function(xmlFile) {
                     alert('Your browser cannot handle this XML');
                     return null;
                 }
-			}
-			else {
-                    alert('No xml exists for this KPI');
-                    
-                }
+              
 		
 				});
 };
 
 $scope.close_dialog = function() {
         document.getElementById("myModal").style.display="none";
-		 document.getElementById("exampleModalLong").style.display="none";
 };
-$scope.new_form = function() {
-saveformFlag=false;
-		 document.getElementById("exampleModalLong").style.display="block";
-};
+
 $scope.view_xml = function() {
         document.getElementById("xml-content").style.overflow = "auto";
         document.getElementById("xml-content").style.display="block";
@@ -487,15 +298,15 @@ $scope.display_list = function() {
         document.getElementById("kpis-list").style.display="block";
 };
 
-$scope.visualmode = function(kpi, equipment){
+
+$scope.visualmode=function() {
 	if (tempoVal) {
 			//console.log(tempoProperty);
 			
  			$scope.dataInfo(globalData, kpiname, tempoVal, tempoProperty, $scope.visualize)
  		}
+		console.log($scope.visualize);
 };
-
-
 $scope.showChart = function(viewkpi, equ) {
 	$scope.equ=equ;
 	var propertName;
@@ -536,98 +347,23 @@ var id = 'mychart';
  	} 
  };
  
-$scope.dataInfo = function(message,kpi, j, propertName, visual){
-	
-	if(visual== 'column'){
-		    //var Products_Quality = google.visualization.arrayToDataTable(arr3);
-	var data=new google.visualization.DataTable();
-	 data.addColumn('datetime', 'Day');
-      data.addColumn('number', kpi);
-	  data.addColumn('number' );
-	  data.addRows(message[kpi][propertName]);
-      var options2 = {
-		  hAxis: {
-          title: 'Time',
-           format: 'hh:mm:ss',
-        },
-		backgroundColor: 'transparent',
-        legend: { position: 'top', maxLines: 3 },
-        bar: { groupWidth: '75%' },
-        isStacked: true,
-		
-		colors:['#2E8B57','#FF0000'],
-      };
-		
-		
-		var chart2 = new google.visualization.ColumnChart(document.getElementById('piechart'));
- 	chart2.draw(data, options2);
-	}
-	else if (visual== 'line')
-	{var newarr=[];
-		message[kpi][propertName].forEach(function(each){
-			
-			newarr.push([each[0], each[1]]);
-		});
-		var data=new google.visualization.DataTable();
-	 data.addColumn('datetime', 'Day');
-      data.addColumn('number', kpi);
-	  data.addRows(newarr);
-      var options4 = {
-		  hAxis: {
-          title: 'Time',
-           format: 'hh:mm:ss',
-        },
-		vAxis:{title: kpi, viewWindow: {
-          min: 0,
-          max: 100
-        }},
-		backgroundColor: { fill:'transparent' },
-		pointSize: 10,
-        pointShape: 'circle'
-      };
-		
-		
-		var chart4 = new google.visualization.LineChart(document.getElementById('piechart'));
- 	chart4.draw(data, options4);
-		
-	}
-	else if(visual== 'pie')
-	{
-		var ROB_AvailabilityData = google.visualization.arrayToDataTable([
- 		['Task', 'Hours per Day'],
- 		[kpi, message[kpi][propertName][(message[kpi][propertName].length-1)][1]],
- 		['', message[kpi][propertName][(message[kpi][propertName].length-1)][2]]
- 	]);
- 	var options1 = {
- 		title: kpi,
- 		is3D: true,
-		backgroundColor: 'transparent',
- 		 slices: {
- 			0: {
- 				offset: 0.2
- 			} 
- 		},
- 	};
-	
- 	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
- 	chart1.draw(ROB_AvailabilityData, options1);
-		
-	}
-	
-	//console.log(message);
+$scope.dataInfo = function(message,kpi, j, propertName, visualize){
+	console.log('*************visualize Name*****************')
+	console.log(visualize);
 	//console.log('*************KPI Name*****************')
 //console.log(kpi);
 	//console.log("propertyname is ");
-	
-/* 	
-	console.log(propertName);
+	//console.log(propertName);
 	console.log(kpi);
 	message[kpi].forEach(function(property){
 		//console.log(property);
 		var key = Object.keys(property);
 if(key[0] == propertName){	
-	//console.log('properties keys matched');
-	if (kpi=='Availability' || kpi=='Allocation-Efficiency' || kpi=='Utilization-Efficiency' ){
+
+	console.log('properties keys matched');
+	console.log(previousKPI);
+	console.log(kpi);
+	if (visualize=='pie' ){
  	var ROB_AvailabilityData = google.visualization.arrayToDataTable([
  		['Task', 'Hours per Day'],
  		['Busy', property[propertName]],
@@ -647,32 +383,43 @@ if(key[0] == propertName){
  	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
  	chart1.draw(ROB_AvailabilityData, options1);
 	}
-	else if(kpi=='Quality-Ratio')
+	else if(visualize=='column' )
 	{
-
+if (previousKPI != kpi || previousProperty!=propertName)
+{
+		console.log(previousKPI);
+	console.log(kpi);
+	datata=[];
+	time1= property.hasTime;
+		var datetime= new Date(property.hasTime);
+	datata=[[datetime,property[propertName]]];
+}
 	
-		  /* if (time!=property.hasTime)
+		  if (time1!=property.hasTime)
 		{  
 		 //year=i.toString();
 		//var datata=[[ i, property[propertName], 100 - property[propertName], '']];
-		time= property.hasTime;
+		time1= property.hasTime;
 		var datetime= new Date(property.hasTime);
-		 datata.push([datetime,property[propertName], 100 - property[propertName]]);
+		 datata.push([datetime,property[propertName]]);
 		 } 
- if (datata.length==8){datata.shift();}	   */
-	/* var array1= [['Genre','Good Quantity', 'Scrap Quantity', { role: 'annotation' } ]];
+ if (datata.length==8){datata.shift();}	  
+	var array1= [['Genre','Good Quantity', { role: 'annotation' } ]];
 		var arr3= array1.concat(datata);
 		    //var Products_Quality = google.visualization.arrayToDataTable(arr3);
 	var data=new google.visualization.DataTable();
 	 data.addColumn('datetime', 'Day');
-      data.addColumn('number', 'Good Ratio');
-	  data.addColumn('number', 'Scrap Ratio');
+      data.addColumn('number', kpi);
 	  data.addRows(datata);
       var options2 = {
 		  hAxis: {
           title: 'Time',
            format: 'hh:mm:ss',
         },
+		vAxis:{ viewWindow: {
+          min: 0,
+          max: 100
+        }},
         legend: { position: 'top', maxLines: 3 },
         bar: { groupWidth: '75%' },
         isStacked: true,
@@ -683,35 +430,43 @@ if(key[0] == propertName){
 		var chart2 = new google.visualization.ColumnChart(document.getElementById('piechart'));
  	chart2.draw(data, options2);
 	}
-	else if(kpi=='Scrap-Ratio')
+	else if(visualize=='line')
 	{
-
+if (previousKPI != kpi || previousProperty!=propertName)
+{
+	console.log(previousKPI);
+	console.log(kpi);
+	console.log('i cleaned the Line ')
+	datata=[];
+	time1= property.hasTime;
+		var datetime= new Date(property.hasTime);
+datata=[[datetime,property[propertName]]];
+}
 	
-		  if ((time1!=property.hasTime))
+		  if (time1!=property.hasTime)
 		{  
 		// year1=i.toString();
 		time1= property.hasTime;
 		var datetime= new Date(property.hasTime);
 		//var datata=[[ i, property[propertName], 100 - property[propertName], '']];
-		 datata1.push([datetime,property[propertName]]);
-		 
+		 datata.push([datetime,property[propertName]]);
 		}
- if (datata1.length==12){datata1.shift();}	  
+ if (datata.length==12){datata.shift();}	  
 	var array4= [['Genre','Scrap Quantity', { role: 'annotation' } ]];
-		var arr5= array4.concat(datata1);
+		var arr5= array4.concat(datata);
 		    //var Products_Scrap = google.visualization.arrayToDataTable(arr5);
 var data=new google.visualization.DataTable();
 	 data.addColumn('datetime', 'Day');
-      data.addColumn('number', 'Scrap Ratio');
-	  data.addRows(datata1);
+      data.addColumn('number', kpi);
+	  data.addRows(datata);
       var options3 = {
 		  hAxis: {
           title: 'Time',
            format: 'hh:mm:ss',
         },
-		vAxis:{title: 'Scrap Ratio', viewWindow: {
+		vAxis:{title: 'unProductive', viewWindow: {
           min: 0,
-          max: 75
+          max: 100
         }},
 		pointSize: 10,
         pointShape: 'circle'
@@ -721,46 +476,8 @@ var data=new google.visualization.DataTable();
 		var chart3 = new google.visualization.LineChart(document.getElementById('piechart'));
  	chart3.draw(data, options3);
 	}
-	else
-	{
-
-	
-		  if ((time3!=property.hasTime))
-		{  
-		// year1=i.toString();
-		time3= property.hasTime;
-		var datetime= new Date(property.hasTime); */
-		//var datata=[[ i, property[propertName], 100 - property[propertName], '']];
-/* 		 datata2.push([datetime,property[propertName]]);
-		 
-		}
- if (datata2.length==12){datata2.shift();}	  
-	var array6= [['Genre','productive', { role: 'annotation' } ]];
-		var arr7= array6.concat(datata2);
-		    //var Products_Scrap = google.visualization.arrayToDataTable(arr5);
-var data=new google.visualization.DataTable();
-	 data.addColumn('datetime', 'Day');
-      data.addColumn('number', kpi);
-	  data.addRows(datata2);
-      var options4 = {
-		  hAxis: {
-          title: 'Time',
-           format: 'hh:mm:ss',
-        },
-		vAxis:{title: kpi, viewWindow: {
-          min: 0,
-          max: 100
-        }},
-		pointSize: 10,
-        pointShape: 'circle'
-      };
-		
-		
-		var chart4 = new google.visualization.LineChart(document.getElementById('piechart'));
- 	chart4.draw(data, options4);
-	}
 }
-	});  */ 
+	}); 
 	/* var rob_number = "ROB" + j + "_" + kpi;
  	var ROB_AvailabilityData = google.visualization.arrayToDataTable([
  		['Task', 'Hours per Day'],
@@ -781,7 +498,8 @@ var data=new google.visualization.DataTable();
  	var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
  	chart1.draw(ROB_AvailabilityData, options1); */
 
-
+previousKPI= kpi;
+previousProperty= propertName;
  };
  
 var init= function()

@@ -3,12 +3,13 @@
   <head>
     <title> {{ title }} </title>
     <script src="{{Host}}:{{SocketPort1}}/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel='stylesheet' href='/stylesheets/adam.css' />
 	 <link rel='stylesheet' href='/stylesheets/style.css' />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+   
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
 	
 	
@@ -170,16 +171,14 @@
                         </a>
                         <ul id="submenu-3" class="panel-collapse collapse panel-switch" role="menu">
                             
-							<li><a href="#"><i class="fa fa-caret-right"></i>  Upload XML
-					</a></li>
-					<li><a href="#"><i class="fa fa-caret-right"></i>  Fill KPI Description FOrm
+					<li><a href="#" ng-click="new_form()" data-toggle="modal" data-target=".formmodal"><i class="fa fa-caret-right"></i>  Fill KPI Description Form
 					</a></li>
                         </ul>
 						
                     </li>
 					
 					
-					<li>
+					<!--  <li>
 					
 					 <a class="accordion-toggle collapsed toggle-switch" data-toggle="collapse" href="#submenu-4">
                             <span class="sidebar-icon"><i class="w3-margin-left fa fa-trash"></i></span>
@@ -194,7 +193,7 @@
 					</a></li>
                         </ul>
 						
-                    </li>
+                    </li>  -->
                 </ul>
             </aside>            
         </div>
@@ -204,7 +203,7 @@
 			</nav>
     <main class="HolyGrail-content">
 	 <div class="bg-primary text-white font-italic text-uppercase">
-	<h2 style= "padding:10px;  text-align: center;"> KPI Visualization Panel</h2>
+	<h2 style= "padding:10px;  text-align: left;"> KPI Visualization Panel</h2>
 </div>
 	
 	
@@ -215,6 +214,11 @@
 <tr> <td>Equipment Name: <p style="font: bold 14px Georgia, serif;display: inline;">//equ// </p> </td> </tr>
 <tr> <td>Formula: <p style="font: bold 14px Georgia, serif;display: inline;">//Formula// </p> </td></tr>
 <tr> <td>Trend: <p style="font: bold 14px Georgia, serif;display: inline;">//Trend// </p> </td></tr>
+ <tr> <td>Visualize By: <p style="font: bold 14px Georgia, serif;display: inline;"><form action="">
+  <input type="radio" ng-model="visualize" value="pie" ng-checked=true ng-change="visualmode()"> Pie Chart
+  <input type="radio" ng-model="visualize" value="line" ng-change="visualmode()"> Line Chart
+  <input type="radio" ng-model="visualize" value="column" ng-change="visualmode()"> Column Chart
+</form></p> </td></tr> 
 <tr> <td>Graph: <div id="mychart" style="display:none;">     
    <div id="piechart" style="width:900px; height: 500px;"></div>
 	</div> </td> </tr>
@@ -234,7 +238,7 @@
         <button type="button" id="btn-close" ng-click="close_dialog()" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-       <pre style="height: 200px !important;"> 
+       <pre style="height: 400px !important;"> 
                         <ol id="robots-boxes1">
             <li ng-repeat= "equipment in equipmentlistDelete"><input type="checkbox"  ng-checked="checkedequipment1.indexOf(equipment) != -1" ng-click="toggleCheck1(equipment)"/> //equipment//</li>
                         </ol>
@@ -265,7 +269,7 @@
 		<button type="button" ng-click="view_xml()" class="btn btn-default" style="background-color:#0066dd;width: 65px;color:#ddeeff">View</button>
       </div>
       <div class="modal-body">
-       <pre style="height: 200px !important;"> 
+       <pre style="height: 400px !important;"> 
                     
 					<div style="overflow: auto; display: none;" id="xml-content" class="modal-body">//xmlFile//</div>
                    
@@ -277,7 +281,166 @@
       </div>
       <div class="modal-footer">
         <button type="button" ng-click="save_equipment(); loadRobots(); close_dialog() " class="btn btn-default" style="background-color: #0066dd; width: 65px;color:#ddeeff" data-dismiss="modal">Done</button>
-                    <button type="button" ng-click="getEquipmentlist(); assign_robot()" class="btn btn-default" style="background-color: #0066dd; float: left; width: 65px;color:#ddeeff">Assign</button>
+                    <button type="button" ng-click="getEquipmentlist(xmlFileName); assign_robot()" class="btn btn-default" style="background-color: #0066dd; float: left; width: 65px;color:#ddeeff">Assign</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+	
+	<div class="modal modal-wide fade formmodal" id="exampleModalLong" role="dialog" style="display: none;margin-top: 150px;" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+	 <!-- <div id="myModal" class="modal" style="display: none;margin-top: 150px;" role="dialog"> -->
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title" id="exampleModalLongTitle">Create New KPI</h1>
+        <button type="button" id="btn-close" ng-click="close_dialog()" class="close" data-dismiss="modal">&times;</button>
+	
+      </div>
+      <div class="modal-body">
+       
+                    
+					<div style="overflow: auto;" id="KPIForm" class="modal-body">
+					<form class="contact_form" ng-submit="save_form()" name="contact_form">
+
+
+<ul>
+    <li>
+        <label >Name:</label>
+        <input type="text" name="name" ng-model="Name" required/>
+    </li>
+    <li>
+    <label >Description:</label>
+    <textarea cols="40" rows="6" ng-model="Description"  required> </textarea>
+    <span class="form_hint">Please Add some description about the KPI"</span>
+</li>
+<li>
+    <label >ID:</label>
+    <input type="text" name="website" ng-model="ID" required/>
+	<span class="form_hint">Please Add some description about the KPI"</span>
+</li>
+<li>
+    <label >Scope:</label>
+    <input type="text" name="website" ng-model="Scope" required/>
+</li>
+<li>
+    <label >Formula:</label>
+</li><br>	
+<li>
+    <label >First Variable:</label>
+    <select ng-model="firstvariable" ng-options="x for x in variablelist" ng-model="firstvariable" required></select>
+</li>	
+    <li>
+    <label >First Operator:</label>
+    <select ng-model="firstoperator" ng-options="x for x in operatorlist" ng-model="firstoperator" required></select>
+</li>
+ <li>
+    <label >Second Variable:</label>
+    <select ng-model="secondvariable" ng-options="x for x in variablelist" ng-model="secondvariable" required></select>
+</li>
+ <li>
+    <label >Second Operator:</label>
+   <select ng-model="secondoperator" ng-options="x for x in operatorlist" ng-model="secondoperator" required></select>
+</li>
+ <li>
+    <label >Last Number:</label>
+  <select ng-model="lastnumber" ng-options="x for x in numbers" ng-model="lastnumber" required></select>
+</li>
+ <li>
+    <label >UnitOf Measure:</label>
+    <input type="text" name="Unit" ng-model="Unit" required/>
+</li>
+<li>
+<label >Range:</label>
+</li><br>	
+<li>
+    <label >Range ID:</label>
+     <input type="text" name="Unit" ng-model="RangeID" required/>
+</li>	
+    <li>
+    <label >Range Description:</label>
+     <input type="text" name="Unit" ng-model="RangeDescription" required/>
+</li>
+ <li>
+    <label >Lower Limit:</label>
+     <input type="text" name="Unit" ng-model="LowerLimit" required/>
+</li>
+ <li>
+    <label >Upper Limit:</label>
+    <input type="text" name="Unit" ng-model="UpperLimit" required/>
+</li>
+ <li>
+    <label >Trend:</label>
+    <input type="text" name="Trend1" ng-model="Trend1" required/>
+</li>
+ <li >
+    <label  style="display: inline">Timing:</label>
+    <li ng-repeat= "times in timinglist" style="display: inline">
+	<input   style=" width:20px; height:20px" type="checkbox"  ng-checked="checkedtime.indexOf(times) != -1" ng-click="toggleCheck11(times)" /> //times// </li> 
+</li>
+<li >
+    <label  style="display: inline">Audience:</label>
+    <li ng-repeat= "audience in audiencelist"  style="display: inline">
+	<input style=" width:20px; height:20px" type="checkbox"  ng-checked="checkedaudience.indexOf(audience) != -1" ng-click="toggleCheck2(audience)" /> //audience//</li>
+</li>
+<li >
+    <label  style="display: inline">Production Methodology:</label>
+    <li ng-repeat= "pm in pmlist" style="display: inline">
+	<input style=" width:20px; height:20px" type="checkbox"  ng-checked="checkedpm.indexOf(pm) != -1" ng-click="toggleCheck3(pm)"/> //pm//</li>
+</li>
+
+<li>
+    <label >Notes:</label>
+    <textarea name="message" cols="40" rows="6" ng-model="Notes"> </textarea>
+    <span class="form_hint">Add some Notes about the KPI (optional)</span>
+</li>
+</ul>
+
+ <div class="modal-footer">
+        
+           <button type="button" ng-click="download_form() " class="btn btn-default" style="background-color: #0066dd; width: 90px;color:#ddeeff"  data-dismiss="modal">Download</button>
+               <button type="submit" class="btn btn-default" style="background-color: #0066dd; float:left; width: 75px;color:#ddeeff">Submit</button>  
+      </div>
+	  </form>
+					  <!-- <form  ng-submit="save_form()">
+		
+ID :<br><input type="text" ng-model="ID" class="formclass" required> <br>
+Description:<br> <input type="text" ng-model="Description" class="formclass" required> <br> 
+Name:<br>  <input type="text" ng-model="Name" class="formclass" required> <br> 
+Scope: <br>  <input type="text" ng-model="Scope" class="formclass" required> <br> 
+Formula:<br>  
+firstvariable: <select ng-model="firstvariable" ng-options="x for x in variablelist" class="formclass" required></select> </br>
+firstoperator: <select ng-model="firstoperator" ng-options="x for x in operatorlist" class="formclass" required></select> <br>
+secondvariable: <select ng-model="secondvariable" ng-options="x for x in variablelist" class="formclass" required></select> <br> 
+secondoperator: <select ng-model="secondoperator" ng-options="x for x in operatorlist" class="formclass" required></select> <br> 
+lastnumber: <select ng-model="lastnumber" ng-options="x for x in numbers" class="formclass"></select> <br> 
+Unit Of Measure:<br>  <input type="text" ng-model="Unit" class="formclass"><br> 
+Range: <br> 
+Range ID: <input type="text" ng-model="RangeID" class="formclass"><br> 
+Range Description: <input type="text" ng-model="RangeDescription" class="formclass"><br> 
+Lower Limit: <input type="text" ng-model="LowerLimit" class="formclass"><br> 
+Upper Limit: <input type="text" ng-model="UpperLimit" class="formclass"><br> 
+Trend: <input type="text" ng-model="Trend1" class="formclass"><br> 
+Timing:<li ng-repeat= "times in timinglist"><input  type="checkbox"  ng-checked="checkedtime.indexOf(times) != -1" ng-click="toggleCheck11(times)"/> //times// </li> <br>
+Audience: <li ng-repeat= "audience in audiencelist"><input type="checkbox"  ng-checked="checkedaudience.indexOf(audience) != -1" ng-click="toggleCheck2(audience)"/> //audience//</li><br>
+Production Methodology:<br>  <li ng-repeat= "pm in pmlist"><input type="checkbox"  ng-checked="checkedpm.indexOf(pm) != -1" ng-click="toggleCheck3(pm)"/> //pm//</li><br>
+Notes (optional): <br> <input type="text" ng-model="Notes" class="formclass"> <br> 
+Applicable on: <input type="radio" ng-model="applicable" value="Work Units" ng-checked=true> Work Units (Robots)
+ <input type="radio" ng-model="applicable" value="Production Line" > Production Line (Overall)
+	
+  
+      <div class="modal-footer">
+        
+           <button type="button" ng-click="download_form(); close_dialog() " class="btn btn-default" style="background-color: #0066dd; width: 78px;color:#ddeeff"  data-dismiss="modal">Download</button>
+               <button type="submit" class="btn btn-default" style="background-color: #0066dd; float:left; width: 65px;color:#ddeeff">Submit</button>  
+      </div>
+	  </form> -->
+
+					</div>
+                   
+                      
+               
+
       </div>
     </div>
   </div>

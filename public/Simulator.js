@@ -243,7 +243,7 @@
 			{
 				var palletid = PalletState[6][2][5];
 				args = {MSG:'PalletUnloaded',WS:'7',PalletID:palletid,ServiceID : Args.ServiceID};
-				RTU.emit('Event',args );
+				//RTU.emit('Event',args );
 				args = {Msg:'RobotChangeState',WS:'7',State:'BUSY'};
 				RTU.emit('Notification',args);
 				ZonesPresence[6][2] = 0;
@@ -420,6 +420,9 @@
 			
 			function LoadPaper(Args)
 			{
+					console.log("---------------------------simulator.js-----------------------------------------");
+					console.log(JSON.stringify(Args));
+					console.log("--------------------------------------------------------------------");
 				args = {MSG:'RobotStartLoading',WS:'1',PalletID:Args.PalletID,ServiceID : Args.ServiceID};
 				RTU.emit('Event',args );
 				args = {Msg:'RobotChangeState',WS:'1',State:'BUSY'};
@@ -434,6 +437,7 @@
 				setTimeout(function(){
 					WS_State[0][2]=0;
 				args = {MSG:'PaperLoaded',WS:'1',PalletID:Args.PalletID,ServiceID : Args.ServiceID};
+				console.log(args);
 					RTU.emit('Event',args );
 					
 				args = {MSG:'OpreationFinished',destURL:Args.destURL};

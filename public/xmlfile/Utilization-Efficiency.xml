@@ -4,12 +4,12 @@
 xsi:schemaLocation="http://www.mesa.org/xml/KPI-ML-V01 KPI-ML-V01.xsd" 
 xmlns="http://www.mesa.org/xml/KPI-ML-V01" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> 
- <ID>OLR100</ID> 
- <Description> The actual usage and availability of the planned capacity of a machine, which is measured by the ratio of AUBT to planned unit busy time (PBT). The complementary part is the percentage of actual unit downtime. 
+ <ID>UE100</ID> 
+ <Description>  The utilization efficiency is the ratio between the actual production time (APT) and the actual unit busy time (AUBT). 
  </Description> 
- <Name>Allocation Efficiency (AE)</Name> 
+ <Name>Utilization Efficiency</Name> 
  <Scope> Work unit </Scope>  
- <Formula>Allocation efficiency = Actual Unit Busy Time/Planned Busy Time</Formula> 
+ <Formula>Utilization Efficiency = Actual Production Time/Actual Unit Busy Time</Formula> 
  <UnitOfMeasure>%</UnitOfMeasure> 
  <Range> 
  <ID>Natural</ID> 
@@ -23,8 +23,9 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <Audience>Operator</Audience> 
  <Audience>Supervisor</Audience> 
  <Audience>Management</Audience> 
+  <ProductionMethodology>Discrete</ProductionMethodology> 
  <ProductionMethodology>Batch</ProductionMethodology> 
  <ProductionMethodology>Continuous</ProductionMethodology> 
- <Notes>”The actual usage and availability of the planned capacity of a machine, which is measured by the ratio of AUBT to planned unit busy time (PBT).” 
+ <Notes>”This indicator identifies the productivit y of work units. Because only the production time affects an added value which will be paid by the market, the goal should be to get a high indicator value.” 
  </Notes> 
 </KPIDefinition> 
